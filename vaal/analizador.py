@@ -1,6 +1,6 @@
 import numpy as np
 import re
-from normalizador import normalizar texto
+from normalizador import normalizar_texto
 
 # Red neuronal muy simple para clasificar frases como "informativa" o "irrelevante"
 class MiniRedNeuronal:
