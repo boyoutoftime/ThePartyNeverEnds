@@ -6,12 +6,16 @@ from app.personalidad import dar_estilo
 
 app = FastAPI()
 
-@app.get("/investigar")
+@@app.get("/investigar")
 def investigar(tema: str):
     links = buscar_en_duckduckgo(tema)
     textos = [extraer_texto_de_url(link) for link in links]
-    resumen = resumir_textos(textos)
-    respuesta_final = dar_estilo(resumen, tono="profesional", firma=True)
+    texto_completo = "\n\n".join(textos)
+
+    # Pregunta fija (o podemos generarla dinámicamente)
+    respuesta = analizar_con_pregunta(texto_completo, f"¿Qué se puede decir sobre {tema}?")
+    
+    respuesta_final = dar_estilo(respuesta, tono="profesional", firma=True)
     return {
         "tema": tema,
         "respuesta": respuesta_final
