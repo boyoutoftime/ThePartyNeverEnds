@@ -1,10 +1,11 @@
 import json
 
-with open('terminos_cientificos.json', 'r', encoding='utf-8') as f:
-    terminos = json.load(f)
+def cargar_terminos(ruta='terminos_cientificos.json'):
+    with open(ruta, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-def normalizar_texto(texto):
-    for termino, sinonimos in terminos.items():
-        for sinonimo in sinonimos:
-            texto = texto.replace(sinonimo.lower(), termino.lower())
-    return texto
+def normalizar_palabra(palabra, diccionario):
+    for clave, sinonimos in diccionario.items():
+        if palabra.lower() == clave.lower() or palabra.lower() in [s.lower() for s in sinonimos]:
+            return clave
+    return palabra
