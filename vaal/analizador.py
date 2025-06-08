@@ -1,37 +1,37 @@
-from transformers import pipeline
+import numpy as np
 
-# 🔹 Modelo de resumen (como ya tenías)
-resumidor = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+# Red neuronal muy simple para clasificar frases como "informativa" o "irrelevante"
+class MiniRedNeuronal:
+    def __init__(self, input_size, hidden_size, output_size):
+        self.w1 = np.random.randn(input_size, hidden_size)
+        self.b1 = np.zeros((1, hidden_size))
+        self.w2 = np.random.randn(hidden_size, output_size)
+        self.b2 = np.zeros((1, output_size))
 
-# 🔹 Modelo de pregunta-respuesta (nuestra red neuronal de comprensión)
-qa = pipeline("question-answering", model="deepset/roberta-base-squad2")
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
 
+    def forward(self, x):
+        self.z1 = x @ self.w1 + self.b1
+        self.a1 = self.sigmoid(self.z1)
+        self.z2 = self.a1 @ self.w2 + self.b2
+        output = self.sigmoid(self.z2)
+        return output
 
-def resumir_textos(textos, max_palabras=300):
-    """
-    Resume una lista de textos largos.
-    """
-    todo = "\n\n".join(textos)
-    partes = [todo[i:i+1000] for i in range(0, len(todo), 1000)]
+    def predict(self, x):
+        resultado = self.forward(x)
+        return (resultado > 0.5).astype(int)
 
-    resumenes = []
-    for parte in partes:
-        resumen = resumidor(parte, max_length=200, min_length=50, do_sample=False)
-        resumenes.append(resumen[0]['summary_text'])
+# Convertimos texto en vectores muy simples (cuenta de palabras clave)
+def vectorizar(texto):
+    claves = ['investigación', 'descubrimiento', 'hecho', 'dato', 'ciencia']
+    vector = np.array([[texto.lower().count(palabra) for palabra in claves]])
+    return vector
 
-    final = " ".join(resumenes)
-    return final[:max_palabras*5]  # Limita el largo final
+# Crear la red (input: 5 palabras clave, hidden: 4 neuronas, salida: 1)
+modelo = MiniRedNeuronal(5, 4, 1)
 
-
-def analizar_con_pregunta(texto: str, pregunta: str) -> str:
-    """
-    Usa una red neuronal para responder una pregunta específica sobre un texto.
-    """
-    try:
-        respuesta = qa({
-            'context': texto,
-            'question': pregunta
-        })
-        return respuesta['answer']
-    except Exception as e:
-        return f"[Error en análisis]: {e}"
+def analizar(texto):
+    x = vectorizar(texto)
+    resultado = modelo.predict(x)
+    return "Informativo" if resultado[0][0] == 1 else "Irrelevante"
