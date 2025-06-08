@@ -38,7 +38,7 @@ modelo = MiniRedNeuronal(5, 4, 1)
 
 def preprocesar(texto):
     texto = texto.lower()
-    texto = re.sub(r'[^a-záéíóúüñ\s]', '', texto)  # Solo letras y espacios
+    texto = re.sub(r'[^\w\s\\\+\-\=\{\}\<\>\.\,\/\:\^\%\°]', '', texto)
     palabras = texto.split()
     palabras_norm = [normalizar_palabra(p, terminos) for p in palabras)
     return palabras
