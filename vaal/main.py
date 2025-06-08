@@ -6,7 +6,7 @@ from app.personalidad import dar_estilo
 
 app = FastAPI()
 
-@@app.get("/investigar")
+@app.get("/investigar")
 def investigar(tema: str):
     links = buscar_en_duckduckgo(tema)
     textos = [extraer_texto_de_url(link) for link in links]
