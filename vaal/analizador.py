@@ -1,4 +1,4 @@
-import numpy as np
+import random
 import re
 from normalizador import cargar_texto, normalizar_palabra
 
