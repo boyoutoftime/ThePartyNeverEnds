@@ -1,1 +1,3 @@
-b
+git -clone 
+https://github.com/tu-usuario/ia-investigadora.git
+cd ia-investigadora
