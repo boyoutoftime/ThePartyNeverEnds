@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.buscador import buscar_en_duckduckgo
 from app.lector import extraer_texto_de_url
+from app.analizador import analizar_con_pregunta
 from app.analizador import resumir_textos
 from app.personalidad import dar_estilo
 
