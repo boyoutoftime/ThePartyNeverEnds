@@ -1,6 +1,8 @@
 import numpy as np
 import re
-from normalizador import normalizar_texto
+from normalizador import cargar_texto, normalizar_palabra
+
+términos = cargar_terminos()
 
 # Red neuronal muy simple para clasificar frases como "informativa" o "irrelevante"
 class MiniRedNeuronal:
@@ -39,6 +41,7 @@ def preprocesar(texto):
     texto = re.sub(r'[^a-záéíóúüñ\s]', '', texto)  # Solo letras y espacios
     texto = normalizar_texto(texto)
     palabras = texto.split()
+    palabras_norm = [normalizar_palabra(p, terminos) for p in palabra)
     return palabras
 
 
