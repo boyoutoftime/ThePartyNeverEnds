@@ -1,16 +1,18 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from app.buscador import buscar_en_duckduckgo
+from app.lector import extraer_texto_de_url
+from app.analizador import resumir_textos
+from app.personalidad import dar_estilo
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 @app.get("/investigar")
 def investigar(tema: str):
-    return {"tema": tema, "respuesta": f"Buscando información sobre: {tema}..."}
+    links = buscar_en_duckduckgo(tema)
+    textos = [extraer_texto_de_url(link) for link in links]
+    resumen = resumir_textos(textos)
+    respuesta_final = dar_estilo(resumen, tono="profesional", firma=True)
+    return {
+        "tema": tema,
+        "respuesta": respuesta_final
+    }
