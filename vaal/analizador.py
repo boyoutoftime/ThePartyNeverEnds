@@ -1,6 +1,6 @@
 import random
 import re
-from normalizador import cargar_texto, normalizar_palabra
+from normalizador import cargar_terminos, normalizar_palabra
 
 términos = cargar_terminos()
 
