@@ -20,10 +20,10 @@ class SimpleIAHandler(BaseHTTPRequestHandler):
             return
 
         # Aquí importamos lo necesario
-        from app.buscador import buscar_en_duckduckgo
-        from app.lector import extraer_texto_de_url
-        from app.analizador import analizar_con_pregunta
-        from app.personalidad import dar_estilo
+        from buscador import buscar_en_duckduckgo
+        from lector import extraer_texto_de_url
+        from analizador import analizar_con_pregunta
+        from personalidad import dar_estilo
 
         try:
             links = buscar_en_duckduckgo(tema)
