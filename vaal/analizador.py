@@ -51,7 +51,7 @@ def extraer_caracteristicas(palabras):
     num_largas = sum(1 for p in palabras if len(p) > 7)
     num_numeros = sum(1 for p in palabras if p.isdigit())
     
-    return np.array([[claves_count, raices_count, num_largas, num_numeros, total_palabras]])
+    return [[claves_count, raices_count, num_largas, num_numeros, total_palabras]]
 
 
 def analisis_contextual(caracteristicas):
