@@ -8,9 +8,9 @@ from datetime import datetime, timedelta, timezone
 os.makedirs("pdfs", exist_ok=True)
 
 subcategorias = [
-    "astro-ph/recent", "cond-mat", "gr-qc", "hep-ex",
+    "astro-ph/recent", "cond-mat.mtrl-sci", "gr-qc", "hep-ex",
     "hep-lat", "hep-ph", "hep-th", "math-ph",
-    "nlin", "nucl-ex", "nucl-th", "physics", "quant-ph"
+    "nlin", "nucl-ex", "nucl-th", "physics.plasm-ph", "quant-ph"
 ]
 
 hoy = datetime.now(timezone.utc)
