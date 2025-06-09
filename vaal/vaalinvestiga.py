@@ -3,6 +3,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import os
 import time
+from datetime import datetime, timedelta
 
 os.makedirs("pdfs", exist_ok=True)
 
@@ -12,18 +13,15 @@ subcategorias = [
     "nlin", "nucl-ex", "nucl-th", "physics", "quant-ph"
 ]
 
-def descargar_pdf(id_archivo, subcat):
-    # Verificar si es un ID antiguo con slash
-    if '/' in id_archivo:
-        pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
-        nombre_archivo = id_archivo.replace('/', '_') + ".pdf"
-    else:
-        pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
-        nombre_archivo = id_archivo + ".pdf"
+# Calcular fecha hace 3 meses
+hoy = datetime.utcnow()
+tres_meses_atras = hoy - timedelta(days=90)
+desde_fecha = tres_meses_atras.strftime("%Y%m%d%H%M")  # formato: YYYYMMDDhhmm
 
-    ruta = os.path.join("pdfs", f"{subcat}_{nombre_archivo}")
+def descargar_pdf(id_archivo, subcat):
+    pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+    ruta = f"pdfs/{subcat}_{id_archivo}.pdf"
     print(f"⬇️ Descargando {pdf_url}")
-    
     try:
         urllib.request.urlretrieve(pdf_url, ruta)
         print(f"✅ Guardado como: {ruta}")
@@ -31,20 +29,36 @@ def descargar_pdf(id_archivo, subcat):
         print(f"❌ Error {e.code}: {e.reason} al descargar {pdf_url}")
 
 def procesar_subcategoria(subcat):
-    url = f"http://export.arxiv.org/api/query?search_query=cat:{subcat}&sortBy=lastUpdatedDate&max_results=1"
-    print(f"\n📥 Consultando API: {subcat}")
-    xml = urllib.request.urlopen(url).read()
-    root = ET.fromstring(xml)
+    url = (
+        f"http://export.arxiv.org/api/query?"
+        f"search_query=cat:{subcat}+AND+submittedDate:[{desde_fecha}+TO+*]"
+        f"&sortBy=lastUpdatedDate&max_results=1"
+    )
 
+    print(f"\n📥 Consultando API: {subcat}")
+    try:
+        xml = urllib.request.urlopen(url).read()
+    except Exception as e:
+        print(f"❌ Error al consultar API: {e}")
+        return
+
+    root = ET.fromstring(xml)
     namespaces = {'atom': 'http://www.w3.org/2005/Atom'}
     entries = root.findall('atom:entry', namespaces)
+
     if not entries:
-        print("⚠️ No se encontraron artículos en API.")
+        print("⚠️ No se encontraron artículos recientes.")
         return
 
     entry = entries[0]
-    id_full = entry.find('atom:id', namespaces).text  # "http://arxiv.org/abs/2406.XXXXX"
+    id_full = entry.find('atom:id', namespaces).text
     id_archivo = id_full.split('/')[-1]
+
+    # Saltar IDs del formato antiguo (tienen slash en el ID)
+    if '/' in id_archivo:
+        print(f"⏭️ ID antiguo detectado: {id_archivo}, se omite.")
+        return
+
     print(f"🧠 ID encontrado: {id_archivo}")
     descargar_pdf(id_archivo, subcat)
     time.sleep(2)
