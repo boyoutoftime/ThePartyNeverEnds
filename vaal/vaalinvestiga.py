@@ -1,54 +1,43 @@
-# arxiv_descargador.py
-
+# arxiv_descargador_api.py
 import urllib.request
-import re
+import xml.etree.ElementTree as ET
 import os
 import time
 
-# Subcategorías de física
-subcategorias = [
-    "astro-ph", "cond-mat", "gr-qc", "hep-ex", "hep-lat",
-    "hep-ph", "hep-th", "math-ph", "nlin", "nucl-ex",
-    "nucl-th", "physics", "quant-ph"
-]
-
 os.makedirs("pdfs", exist_ok=True)
 
-def obtener_html(url):
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0"}
-    )
-    with urllib.request.urlopen(req) as response:
-        return response.read().decode("utf-8")
+subcategorias = [
+    "astro-ph", "cond-mat", "gr-qc", "hep-ex",
+    "hep-lat", "hep-ph", "hep-th", "math-ph",
+    "nlin", "nucl-ex", "nucl-th", "physics", "quant-ph"
+]
 
-def descargar_pdf(abs_url, subcat):
-    print(f"🔍 Visitando artículo: {abs_url}")
-    html = obtener_html(abs_url)
-    match = re.search(r'href="(/pdf/\d{4}\.\d{5}(?:v\d+)?\.pdf)"', html)
-    if not match:
-        print("⚠️ PDF no encontrado en la página del artículo.")
-        return
-    pdf_url = "https://arxiv.org" + match.group(1)
-    nombre = f"{subcat}_{match.group(1).split('/')[-1]}"
-    ruta = os.path.join("pdfs", nombre)
-    print(f"⬇️ Descargando: {pdf_url}")
+def descargar_pdf(id_archivo, subcat):
+    pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+    ruta = f"pdfs/{subcat}_{id_archivo}.pdf"
+    print(f"⬇️ Descargando {pdf_url}")
     urllib.request.urlretrieve(pdf_url, ruta)
     print(f"✅ Guardado como: {ruta}")
 
 def procesar_subcategoria(subcat):
-    url = f"https://arxiv.org/list/{subcat}/recent"
-    print(f"\n📥 Revisando: {url}")
-    html = obtener_html(url)
-    ids = re.findall(r'href="(/abs/\d{4}\.\d{5}(?:v\d+)?)"', html)
-    if not ids:
-        print("⚠️ No se encontraron artículos.")
+    url = f"http://export.arxiv.org/api/query?search_query=cat:{subcat}&sortBy=lastUpdatedDate&max_results=1"
+    print(f"\n📥 Consultando API: {subcat}")
+    xml = urllib.request.urlopen(url).read()
+    root = ET.fromstring(xml)
+
+    namespaces = {'atom': 'http://www.w3.org/2005/Atom'}
+    entries = root.findall('atom:entry', namespaces)
+    if not entries:
+        print("⚠️ No se encontraron artículos en API.")
         return
-    reconciliados = list(dict.fromkeys(ids))
-    print(f"🧠 {len(reconciliados)} artículos listos.")
-    descargar_pdf("https://arxiv.org" + reconciliados[0], subcat)
+
+    entry = entries[0]
+    id_full = entry.find('atom:id', namespaces).text  # "http://arxiv.org/abs/2406.XXXXX"
+    id_archivo = id_full.split('/')[-1]
+    print(f"🧠 ID encontrado: {id_archivo}")
+    descargar_pdf(id_archivo, subcat)
     time.sleep(2)
 
-# Ejecutar rutina
-for subcat in subcategorias:
-    procesar_subcategoria(subcat)
+if __name__ == "__main__":
+    for subcat in subcategorias:
+        procesar_subcategoria(subcat)
