@@ -22,7 +22,7 @@ class SimpleIAHandler(BaseHTTPRequestHandler):
         # Aquí importamos lo necesario
         from buscador import 
         from lector import 
-        from analizador
+        from analizador import
         from personalidad import 
 
         try:
