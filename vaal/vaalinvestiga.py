@@ -10,7 +10,7 @@ os.makedirs("pdfs", exist_ok=True)
 subcategorias = [
     "astro-ph", "cond-mat.mtrl-sci", "gr-qc", "hep-ex",
     "hep-lat", "hep-ph", "hep-th", "math-ph",
-    "nlin", "nucl-ex", "nucl-th", "physics.plasm-ph", "quant-ph"
+    "nlin.CD", "nucl-ex", "nucl-th", "physics.plasm-ph", "quant-ph"
 ]
 
 hoy = datetime.now(timezone.utc)
