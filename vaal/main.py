@@ -20,10 +20,10 @@ class SimpleIAHandler(BaseHTTPRequestHandler):
             return
 
         # Aquí importamos lo necesario
-        from vaal.buscador import buscar_en_duckduckgo
-        from vaal.lector import extraer_texto_de_url
-        from vaal.analizador import analizar_con_pregunta
-        from vaal.personalidad import dar_estilo
+        from buscador import buscar_en_duckduckgo
+        from lector import extraer_texto_de_url
+        from analizador import analizar_con_pregunta
+        from personalidad import dar_estilo
 
         try:
             links = buscar_en_duckduckgo(tema)
