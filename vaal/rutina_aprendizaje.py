@@ -15,7 +15,7 @@ def descargar_articulos():
 def estudiar_pdf(ruta_pdf):
     print(f"\n📖 Estudiando: {ruta_pdf}")
     texto = extraer_texto_de_pdf(ruta_pdf)
-    palabras = preprocesar(texto)
+    palabras = preprocesar(texto, términos)
     for palabra in palabras:
         normalizar_palabra(palabra, terminos)
     time.sleep(2)  # simula pausa entre lecturas
