@@ -3,7 +3,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 os.makedirs("pdfs", exist_ok=True)
 
@@ -13,10 +13,8 @@ subcategorias = [
     "nlin", "nucl-ex", "nucl-th", "physics", "quant-ph"
 ]
 
-# Calcular fecha hace 3 meses
-hoy = datetime.utcnow()
+hoy = datetime.now(timezone.utc)
 tres_meses_atras = hoy - timedelta(days=90)
-desde_fecha = tres_meses_atras.strftime("%Y%m%d%H%M")  # formato: YYYYMMDDhhmm
 
 def descargar_pdf(id_archivo, subcat):
     pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
@@ -31,8 +29,7 @@ def descargar_pdf(id_archivo, subcat):
 def procesar_subcategoria(subcat):
     url = (
         f"http://export.arxiv.org/api/query?"
-        f"search_query=cat:{subcat}+AND+submittedDate:[{desde_fecha}+TO+*]"
-        f"&sortBy=lastUpdatedDate&max_results=1"
+        f"search_query=cat:{subcat}&sortBy=lastUpdatedDate&max_results=5"
     )
 
     print(f"\n📥 Consultando API: {subcat}")
@@ -47,21 +44,31 @@ def procesar_subcategoria(subcat):
     entries = root.findall('atom:entry', namespaces)
 
     if not entries:
+        print("⚠️ No se encontraron artículos.")
+        return
+
+    encontrados = 0
+    for entry in entries:
+        fecha_str = entry.find('atom:updated', namespaces).text
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+        if fecha < tres_meses_atras:
+            continue  # ignorar artículos viejos
+
+        id_full = entry.find('atom:id', namespaces).text
+        id_archivo = id_full.split('/')[-1]
+
+        if '/' in id_archivo:
+            print(f"⏭️ ID antiguo detectado: {id_archivo}, se omite.")
+            continue
+
+        print(f"🧠 ID reciente encontrado: {id_archivo}")
+        descargar_pdf(id_archivo, subcat)
+        encontrados += 1
+        time.sleep(2)
+
+    if encontrados == 0:
         print("⚠️ No se encontraron artículos recientes.")
-        return
-
-    entry = entries[0]
-    id_full = entry.find('atom:id', namespaces).text
-    id_archivo = id_full.split('/')[-1]
-
-    # Saltar IDs del formato antiguo (tienen slash en el ID)
-    if '/' in id_archivo:
-        print(f"⏭️ ID antiguo detectado: {id_archivo}, se omite.")
-        return
-
-    print(f"🧠 ID encontrado: {id_archivo}")
-    descargar_pdf(id_archivo, subcat)
-    time.sleep(2)
 
 if __name__ == "__main__":
     for subcat in subcategorias:
