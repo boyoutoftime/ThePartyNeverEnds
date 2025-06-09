@@ -37,7 +37,7 @@ def preprocesar(texto):
     texto = texto.lower()
     texto = re.sub(r'[^\w\s\\\+\-\=\{\}\<\>\.\,\/\:\^\%\°]', '', texto)
     palabras = texto.split()
-    palabras_norm = [normalizar_palabra(p, terminos) for p in palabras)
+    palabras_norm = [normalizar_palabra(p, terminos) for p in palabras]
     return palabras
 
 
