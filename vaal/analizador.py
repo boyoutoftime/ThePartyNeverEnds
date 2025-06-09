@@ -72,3 +72,8 @@ def analizar(texto):
     caracteristicas = extraer_caracteristicas(palabras)
     resultado = analisis_contextual(caracteristicas)
     return resultado
+
+def analizar_con_pregunta(texto, pregunta):
+    # Usa la función principal 'analizar' para aplicar análisis general
+    resultado = analizar(texto)
+    return f"Pregunta: {pregunta}\nRespuesta: {resultado}"
