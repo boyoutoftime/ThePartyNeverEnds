@@ -33,7 +33,7 @@ class MiniRedNeuronal:
 modelo = MiniRedNeuronal(5, 4, 1)
 
 
-def preprocesar(texto):
+def preprocesar(texto, términos):
     texto = texto.lower()
     texto = re.sub(r'[^\w\s\\\+\-\=\{\}\<\>\.\,\/\:\^\%\°]', '', texto)
     palabras = texto.split()
