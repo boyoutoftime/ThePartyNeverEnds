@@ -1,4 +1,4 @@
-# arxiv_descargador_api.py
+# vaalinvestiga.py
 import urllib.request
 import xml.etree.ElementTree as ET
 import os
@@ -18,17 +18,19 @@ tres_meses_atras = hoy - timedelta(days=90)
 
 def descargar_pdf(id_archivo, subcat):
     # Detectar si es un ID antiguo (antes de 2007, no contiene '.')
-if '.' not in id_articulo:
-    url_pdf = f"https://arxiv.org/pdf/{categoria}/{id_articulo}.pdf"
-else:
-    url_pdf = f"https://arxiv.org/pdf/{id_articulo}.pdf"
-    ruta = f"pdfs/{subcat}_{id_archivo}.pdf"
-    print(f"⬇️ Descargando {pdf_url}")
+    if '.' not in id_archivo:
+        print(f"⏭️ ID antiguo detectado: {id_archivo}, se omite.")
+        return
+
+    url_pdf = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+    ruta = f"pdfs/{subcat}_{id_archivo.replace('/', '_')}.pdf"
+    
+    print(f"⬇️ Descargando {url_pdf}")
     try:
-        urllib.request.urlretrieve(pdf_url, ruta)
+        urllib.request.urlretrieve(url_pdf, ruta)
         print(f"✅ Guardado como: {ruta}")
     except urllib.error.HTTPError as e:
-        print(f"❌ Error {e.code}: {e.reason} al descargar {pdf_url}")
+        print(f"❌ Error {e.code}: {e.reason} al descargar {url_pdf}")
 
 def procesar_subcategoria(subcat):
     url = (
@@ -61,10 +63,6 @@ def procesar_subcategoria(subcat):
 
         id_full = entry.find('atom:id', namespaces).text
         id_archivo = id_full.split('/')[-1]
-
-        if '/' in id_archivo:
-            print(f"⏭️ ID antiguo detectado: {id_archivo}, se omite.")
-            continue
 
         print(f"🧠 ID reciente encontrado: {id_archivo}")
         descargar_pdf(id_archivo, subcat)
