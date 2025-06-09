@@ -28,10 +28,19 @@ def descargar_pdf(abs_url, subcat):
     urllib.request.urlretrieve(pdf_url, ruta)
     print(f"✅ Guardado como: {ruta}")
 
+def obtener_html(url):
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0"}
+    )
+    with urllib.request.urlopen(req) as response:
+        return response.read().decode("utf-8")
+
 def procesar_subcategoria(subcat):
     url = f"https://arxiv.org/list/{subcat}/recent"
     print(f"\n📥 Revisando: {url}")
-    html = urllib.request.urlopen(url).read().decode("utf-8")
+    html = obtener_html(url)  # en procesar_subcategoria
+html = obtener_html(abs_url)  # en descargar_pdf
     # Extraer IDs (/abs/2406.XXXXX)
     ids = re.findall(r'href="(/abs/\d{4}\.\d{5}(?:v\d+)?)"', html)
     if not ids:
