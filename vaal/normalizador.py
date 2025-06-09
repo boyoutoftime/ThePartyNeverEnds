@@ -7,6 +7,10 @@ def cargar_terminos(ruta='terminos_cientificos.json'):
     with open(ruta, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def guardar_diccionario(diccionario, ruta='terminos_cientificos.json'):
+    with open(ruta, 'w', encoding='utf-8') as f:
+        json.dump(diccionario, f, indent=2, ensure_ascii=False)
+
 class TextExtractor(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -31,9 +35,6 @@ def buscar_en_duckduckgo(palabra):
             return parser.get_text()[:500]
     except:
         return None
-def guardar_diccionario(diccionario, ruta='terminos_cientificos.json'):
-    with open(ruta, 'w', encoding='utf-8') as f:
-        json.dump(diccionario, f, indent=2, ensure_ascii=False)
 
 def normalizar_palabra(palabra, diccionario):
     palabra_lower = palabra.lower()
