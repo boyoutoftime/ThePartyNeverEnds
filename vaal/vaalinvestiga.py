@@ -5,51 +5,52 @@ import re
 import os
 import time
 
-# Subcategorías a explorar
+# Subcategorías científicas
 subcategorias = [
     "astro-ph", "cond-mat", "gr-qc", "hep-ex", "hep-lat", "hep-ph",
     "hep-th", "math-ph", "nlin", "nucl-ex", "nucl-th", "physics", "quant-ph"
 ]
 
-# Carpeta para guardar los PDFs
+# Crear carpeta si no existe
 os.makedirs("pdfs", exist_ok=True)
 
 def descargar_pdf(abs_id, subcat):
     pdf_url = f"https://arxiv.org/pdf/{abs_id}.pdf"
-    archivo = f"pdfs/{subcat}_{abs_id}.pdf"
+    archivo_local = f"pdfs/{subcat}_{abs_id}.pdf"
     try:
-        print(f"➡️ Descargando PDF desde: {pdf_url}")
-        urllib.request.urlretrieve(pdf_url, archivo)
-        print(f"✅ PDF guardado en: {archivo}")
+        print(f"⬇️ Descargando PDF: {pdf_url}")
+        urllib.request.urlretrieve(pdf_url, archivo_local)
+        print(f"✅ Guardado como: {archivo_local}")
     except Exception as e:
-        print(f"❌ Error al descargar PDF: {e}")
+        print(f"❌ Error al descargar {pdf_url}: {e}")
 
 def procesar_subcategoria(subcat):
     url = f"https://arxiv.org/list/{subcat}/recent"
-    print(f"\n📥 Revisando subcategoría: {url}")
+    print(f"\n🔎 Visitando: {url}")
 
     try:
         with urllib.request.urlopen(url) as response:
-            html = response.read().decode('utf-8')
+            html = response.read().decode("utf-8")
     except Exception as e:
-        print(f"❌ Error al acceder a {url}: {e}")
+        print(f"❌ Error al abrir {url}: {e}")
         return
 
-    # Buscar todos los enlaces /abs/XXXX.XXXXX
-    articulos = re.findall(r'href="/abs/(\d{4}\.\d{5})"', html)
+    # Buscar todos los ID del tipo arXiv:2406.00493
+    ids = re.findall(r'href="/abs/(\d{4}\.\d{5})"', html)
 
-    if not articulos:
-        print("⚠️ No se encontraron artículos en esta subcategoría.")
+    if not ids:
+        print("⚠️ No se encontraron artículos recientes.")
         return
 
-    articulos = list(dict.fromkeys(articulos))  # quitar duplicados
-    print(f"📚 Se encontraron {len(articulos)} artículos")
+    # Eliminar duplicados (por si se repiten)
+    ids = list(dict.fromkeys(ids))
+    print(f"📄 Artículos encontrados: {len(ids)}")
 
-    # Descargar el primero (puedes cambiar a varios)
-    for abs_id in articulos[:1]:
+    # Descargar el primero
+    for abs_id in ids[:1]:
         descargar_pdf(abs_id, subcat)
-        time.sleep(3)  # pausa para evitar ser bloqueado
+        time.sleep(2)
 
-# Revisar todas las subcategorías
+# Ejecutar sobre todas las subcategorías
 for subcat in subcategorias:
     procesar_subcategoria(subcat)
