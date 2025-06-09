@@ -22,7 +22,7 @@ class SimpleIAHandler(BaseHTTPRequestHandler):
         # Aquí importamos lo necesario
         from buscador import buscar_en_duckduckgo
         from lector import extraer_texto_de_url
-        from analizador import analizar
+        from analizador import analizar_con_pregunta
         from personalidad import dar_estilo
 
         try:
