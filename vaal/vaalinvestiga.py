@@ -17,14 +17,17 @@ hoy = datetime.now(timezone.utc)
 tres_meses_atras = hoy - timedelta(days=90)
 
 def descargar_pdf(id_archivo, subcat):
-    # Detectar si es un ID antiguo (antes de 2007, no contiene '.')
-    if '.' not in id_archivo:
-        print(f"⏭️ ID antiguo detectado: {id_archivo}, se omite.")
-        return
+    if '.' in id_archivo:
+        # ID moderno (después de 2007)
+        url_pdf = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+        nombre_archivo = id_archivo.replace('/', '_')
+    else:
+        # ID antiguo (antes de 2007) → necesita la subcategoría
+        url_pdf = f"https://arxiv.org/pdf/{subcat}/{id_archivo}.pdf"
+        nombre_archivo = f"{subcat}_{id_archivo}"
 
-    url_pdf = f"https://arxiv.org/pdf/{id_archivo}.pdf"
-    ruta = f"pdfs/{subcat}_{id_archivo.replace('/', '_')}.pdf"
-    
+    ruta = f"pdfs/{nombre_archivo}.pdf"
+
     print(f"⬇️ Descargando {url_pdf}")
     try:
         urllib.request.urlretrieve(url_pdf, ruta)
