@@ -1,66 +1,48 @@
-# archivo: arxiv_descargador.py
+# arxiv_descargador.py
 
 import urllib.request
 import re
 import os
 import time
 
+# Subcategorías de física
 subcategorias = [
-    "astro-ph", "cond-mat", "gr-qc", "hep-ex", "hep-lat", "hep-ph",
-    "hep-th", "math-ph", "nlin", "nucl-ex", "nucl-th", "physics", "quant-ph"
+    "astro-ph", "cond-mat", "gr-qc", "hep-ex", "hep-lat",
+    "hep-ph", "hep-th", "math-ph", "nlin", "nucl-ex",
+    "nucl-th", "physics", "quant-ph"
 ]
 
 os.makedirs("pdfs", exist_ok=True)
 
-def descargar_pdf_desde_abs(abs_url, subcat):
+def descargar_pdf(abs_url, subcat):
     print(f"🔍 Visitando artículo: {abs_url}")
-    try:
-        with urllib.request.urlopen(abs_url) as response:
-            html = response.read().decode("utf-8")
-    except Exception as e:
-        print(f"❌ Error al abrir artículo: {e}")
+    html = urllib.request.urlopen(abs_url).read().decode("utf-8")
+    match = re.search(r'href="(/pdf/\d{4}\.\d{5}(?:v\d+)?\.pdf)"', html)
+    if not match:
+        print("⚠️ PDF no encontrado en la página del artículo.")
         return
-
-    # Buscar el enlace al PDF dentro de la página del artículo
-    match = re.search(r'href="(/pdf/\d{4}\.\d{5}(v\d+)?\.pdf)"', html)
-    if match:
-        pdf_path = match.group(1)
-        pdf_url = "https://arxiv.org" + pdf_path
-        nombre_archivo = f"pdfs/{subcat}_{pdf_path.split('/')[-1]}"
-        try:
-            print(f"⬇️ Descargando PDF: {pdf_url}")
-            urllib.request.urlretrieve(pdf_url, nombre_archivo)
-            print(f"✅ Guardado como: {nombre_archivo}")
-        except Exception as e:
-            print(f"❌ Error al descargar PDF: {e}")
-    else:
-        print("⚠️ No se encontró enlace al PDF.")
+    pdf_url = "https://arxiv.org" + match.group(1)
+    nombre = f"{subcat}_{match.group(1).split('/')[-1]}"
+    ruta = os.path.join("pdfs", nombre)
+    print(f"⬇️ Descargando: {pdf_url}")
+    urllib.request.urlretrieve(pdf_url, ruta)
+    print(f"✅ Guardado como: {ruta}")
 
 def procesar_subcategoria(subcat):
     url = f"https://arxiv.org/list/{subcat}/recent"
-    print(f"\n📥 Revisando subcategoría: {url}")
-    try:
-        with urllib.request.urlopen(url) as response:
-            html = response.read().decode("utf-8")
-    except Exception as e:
-        print(f"❌ Error al acceder a la subcategoría: {e}")
-        return
-
-    # Buscar links de artículos individuales
-    enlaces_abs = re.findall(r'href="(/abs/\d{4}\.\d{5})"', html)
-
-    if not enlaces_abs:
+    print(f"\n📥 Revisando: {url}")
+    html = urllib.request.urlopen(url).read().decode("utf-8")
+    # Extraer IDs (/abs/2406.XXXXX)
+    ids = re.findall(r'href="(/abs/\d{4}\.\d{5}(?:v\d+)?)"', html)
+    if not ids:
         print("⚠️ No se encontraron artículos.")
         return
+    reconciliados = list(dict.fromkeys(ids))
+    print(f"🧠 {len(reconciliados)} artículos listos.")
+    # Procesar el primero
+    descargar_pdf("https://arxiv.org" + reconciliados[0], subcat)
+    time.sleep(2)
 
-    # Eliminar duplicados
-    enlaces_abs = list(dict.fromkeys(enlaces_abs))
-
-    # Procesar solo el primero (puedes cambiar a más si quieres)
-    for enlace in enlaces_abs[:1]:
-        abs_url = "https://arxiv.org" + enlace
-        descargar_pdf_desde_abs(abs_url, subcat)
-        time.sleep(2)
-
+# Ejecutar rutina
 for subcat in subcategorias:
     procesar_subcategoria(subcat)
