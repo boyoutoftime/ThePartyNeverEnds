@@ -63,4 +63,4 @@ def procesar_subcategoria(subcat):
         time.sleep(2)
 
 for subcat in subcategorias:
-    procesar
+    procesar_subcategoria(subcat)
