@@ -5,9 +5,19 @@ def cargar_terminos(ruta='terminos_cientificos.json'):
         return json.load(f)
 
 def normalizar_palabra(palabra, diccionario):
+    palabra_lower = palabra.lower()
+
     for clave, sinonimos in diccionario.items():
-        if palabra.lower() == clave.lower() or palabra.lower() in [s.lower() for s in sinonimos]:
+        if palabra_lower == clave.lower() or palabra_lower in [s.lower() for s in sinonimos]:
             return clave
+
+    definicion = buscar_en_duckduckgo(palabra)
+    if definicion:
+        print(f"Nuevo término aprendido: {palabra} → {definicion[:60]}...")
+        diccionario[palabra] = []
+        guardar_diccionario(diccionario)
+        return palabra
+
     return palabra
 
 import urllib.parse
