@@ -17,7 +17,11 @@ hoy = datetime.now(timezone.utc)
 tres_meses_atras = hoy - timedelta(days=90)
 
 def descargar_pdf(id_archivo, subcat):
-    pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+    # Detectar si es un ID antiguo (antes de 2007, no contiene '.')
+if '.' not in id_articulo:
+    url_pdf = f"https://arxiv.org/pdf/{categoria}/{id_articulo}.pdf"
+else:
+    url_pdf = f"https://arxiv.org/pdf/{id_articulo}.pdf"
     ruta = f"pdfs/{subcat}_{id_archivo}.pdf"
     print(f"⬇️ Descargando {pdf_url}")
     try:
