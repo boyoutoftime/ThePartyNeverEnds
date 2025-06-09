@@ -13,11 +13,22 @@ subcategorias = [
 ]
 
 def descargar_pdf(id_archivo, subcat):
-    pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
-    ruta = f"pdfs/{subcat}_{id_archivo}.pdf"
+    # Verificar si es un ID antiguo con slash
+    if '/' in id_archivo:
+        pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+        nombre_archivo = id_archivo.replace('/', '_') + ".pdf"
+    else:
+        pdf_url = f"https://arxiv.org/pdf/{id_archivo}.pdf"
+        nombre_archivo = id_archivo + ".pdf"
+
+    ruta = os.path.join("pdfs", f"{subcat}_{nombre_archivo}")
     print(f"⬇️ Descargando {pdf_url}")
-    urllib.request.urlretrieve(pdf_url, ruta)
-    print(f"✅ Guardado como: {ruta}")
+    
+    try:
+        urllib.request.urlretrieve(pdf_url, ruta)
+        print(f"✅ Guardado como: {ruta}")
+    except urllib.error.HTTPError as e:
+        print(f"❌ Error {e.code}: {e.reason} al descargar {pdf_url}")
 
 def procesar_subcategoria(subcat):
     url = f"http://export.arxiv.org/api/query?search_query=cat:{subcat}&sortBy=lastUpdatedDate&max_results=1"
