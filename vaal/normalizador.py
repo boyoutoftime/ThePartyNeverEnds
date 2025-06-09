@@ -1,28 +1,11 @@
 import json
+import urllib.parse
+import urllib.request
+from html.parser import HTMLParser
 
 def cargar_terminos(ruta='terminos_cientificos.json'):
     with open(ruta, 'r', encoding='utf-8') as f:
         return json.load(f)
-
-def normalizar_palabra(palabra, diccionario):
-    palabra_lower = palabra.lower()
-
-    for clave, sinonimos in diccionario.items():
-        if palabra_lower == clave.lower() or palabra_lower in [s.lower() for s in sinonimos]:
-            return clave
-
-    definicion = buscar_en_duckduckgo(palabra)
-    if definicion:
-        print(f"Nuevo término aprendido: {palabra} → {definicion[:60]}...")
-        diccionario[palabra] = []
-        guardar_diccionario(diccionario)
-        return palabra
-
-    return palabra
-
-import urllib.parse
-import urllib.request
-from html.parser import HTMLParser
 
 class TextExtractor(HTMLParser):
     def __init__(self):
@@ -51,3 +34,19 @@ def buscar_en_duckduckgo(palabra):
 def guardar_diccionario(diccionario, ruta='terminos_cientificos.json'):
     with open(ruta, 'w', encoding='utf-8') as f:
         json.dump(diccionario, f, indent=2, ensure_ascii=False)
+
+def normalizar_palabra(palabra, diccionario):
+    palabra_lower = palabra.lower()
+
+    for clave, sinonimos in diccionario.items():
+        if palabra_lower == clave.lower() or palabra_lower in [s.lower() for s in sinonimos]:
+            return clave
+
+    definicion = buscar_en_duckduckgo(palabra)
+    if definicion:
+        print(f"Nuevo término aprendido: {palabra} → {definicion[:60]}...")
+        diccionario[palabra] = []
+        guardar_diccionario(diccionario)
+        return palabra
+
+    return palabra
