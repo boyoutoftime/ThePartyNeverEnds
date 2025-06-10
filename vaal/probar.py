@@ -1,10 +1,16 @@
 import os
 import json
+import sys
 import re
 from lector import extraer_texto_de_pdf
 
 # Ruta del PDF para prueba
-PDF_PRUEBA = "pdfs/ejemplo_arxiv.pdf"  # Asegúrate de que exista
+
+if len(sys.argv) < 2:
+    print("❌ Uso: python prueba.py <ruta_pdf>")
+    exit()
+
+PDF_PRUEBA = sys.argv[1]
 
 # Cargar o crear diccionario de símbolos aprendidos
 def cargar_simbolos(ruta='simbolos_aprendidos.json'):
