@@ -1,32 +1,35 @@
-from pylatexenc.latexwalker import LatexWalker
+from pylatexenc.latexwalker import LatexWalker, LatexEnvironmentNode, LatexMathNode
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    nodelist, parsing_errors = walker.get_latex_nodes(pos=0)
+    nodos, errores = walker.get_latex_nodes()
 
     bloques_matematicos = []
-    texto_normal = []
-    for nodo in nodelist:
+    bloques_texto = []
+
+    for nodo in nodos:
         contenido = texto[nodo.pos:nodo.pos_end]
-        if nodo.isNodeType('LatexMathNode'):
-            bloques_matematicos.append(contenido)
+        if isinstance(nodo, LatexMathNode):
+            bloques_matematicos.append(contenido.strip())
         else:
-            texto_normal.append(contenido)
+            bloques_texto.append(contenido.strip())
 
-    return texto_normal, bloques_matematicos
+    return bloques_texto, bloques_matematicos
 
-if __name__ == "__main__":
-    texto = r"""
-    Este es un documento sobre física cuántica.
-    La ecuación de Schrödinger es: i\hbar \frac{\partial}{\partial t} \Psi = \hat{H} \Psi
-    También existen expresiones como $E=mc^2$ y otras fórmulas.
-    """
+# Prueba con texto mixto
+texto_prueba = r"""
+Este es un documento sobre física cuántica.
+La ecuación de Schrödinger es: $i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi$
+También existen expresiones como $E = mc^2$ y otras fórmulas.
+Este texto debe ir como bloque normal.
+"""
 
-    resultado = detectar_bloques_latex(texto)
+texto, ecuaciones = detectar_bloques_latex(texto_prueba)
 
-    print("→ TEXTO NORMAL:")
-    print(resultado['texto'])
-    print("\n→ BLOQUES MATEMÁTICOS:")
-    print(resultado['matematico'])
-    print("\n→ RUIDO DETECTADO:")
-    print(resultado['ruido'])
+print("→ TEXTO NORMAL:")
+for t in texto:
+    print("-", t)
+
+print("\n→ BLOQUES MATEMÁTICOS:")
+for e in ecuaciones:
+    print("-", e)
