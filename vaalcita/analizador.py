@@ -1,7 +1,3 @@
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import random
 import re
 from normalizador import cargar_terminos, normalizar_palabra
