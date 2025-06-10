@@ -1,25 +1,52 @@
+import os
+import json
+import re
 from lector import extraer_texto_de_pdf
-import sys
 
-def porcentaje_ruido(texto):
-    total = len(texto)
-    if total == 0:
-        return 100
-    caracteres_raros = sum(1 for c in texto if ord(c) > 126 or ord(c) < 32 and c not in '\n\t\r')
-    return (caracteres_raros / total) * 100
+# Ruta del PDF para prueba
+PDF_PRUEBA = "pdfs/ejemplo_arxiv.pdf"  # Asegúrate de que exista
 
+# Cargar o crear diccionario de símbolos aprendidos
+def cargar_simbolos(ruta='simbolos_aprendidos.json'):
+    if os.path.exists(ruta):
+        with open(ruta, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def guardar_simbolos(diccionario, ruta='simbolos_aprendidos.json'):
+    with open(ruta, 'w', encoding='utf-8') as f:
+        json.dump(diccionario, f, indent=2, ensure_ascii=False)
+
+# Detecta si una línea parece una ecuación científica
+def es_ecuacion(linea):
+    if "=" in linea or re.search(r"\b\d+(\.\d+)?\b", linea):
+        simbolos = re.findall(r"[^\w\s]", linea)  # signos no alfanuméricos
+        if len(simbolos) / max(1, len(linea)) > 0.1:
+            return True
+    return False
+
+# Extrae símbolos individuales usados en la ecuación
+def extraer_simbolos(ecuacion):
+    return sorted(set(re.findall(r"[^\w\s]", ecuacion)))
+
+# --- Flujo principal ---
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Uso: python test_pdf_ruidoso.py archivo.pdf")
-        sys.exit(1)
+    if not os.path.exists(PDF_PRUEBA):
+        print("❌ No se encontró el PDF de prueba.")
+        exit()
 
-    ruta = sys.argv[1]
-    print(f"🧪 Analizando ruido en: {ruta}")
-    texto = extraer_texto_de_pdf(ruta)
-    ruido = porcentaje_ruido(texto)
-    print(f"🔎 Porcentaje de ruido: {ruido:.2f}%")
+    texto = extraer_texto_de_pdf(PDF_PRUEBA)
+    lineas = texto.split('\n')
+    simbolos_aprendidos = cargar_simbolos()
 
-    if ruido > 30:
-        print("⚠️ El PDF contiene demasiado ruido. Se recomienda descartarlo.")
-    else:
-        print("✅ El PDF parece legible.")
+    for linea in lineas:
+        if es_ecuacion(linea):
+            print(f"\n🧮 Ecuación detectada:\n{linea.strip()}")
+            nuevos = extraer_simbolos(linea)
+            for s in nuevos:
+                if s not in simbolos_aprendidos:
+                    simbolos_aprendidos[s] = "Símbolo detectado en ecuación"
+                    print(f"➕ Nuevo símbolo aprendido: {s}")
+
+    guardar_simbolos(simbolos_aprendidos)
+    print("\n✅ Lectura de ecuaciones completada. Simbolos guardados.").")
