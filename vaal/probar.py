@@ -49,4 +49,4 @@ if __name__ == '__main__':
                     print(f"➕ Nuevo símbolo aprendido: {s}")
 
     guardar_simbolos(simbolos_aprendidos)
-    print("\n✅ Lectura de ecuaciones completada. Simbolos guardados.").")
+    print("\n✅ Lectura de ecuaciones completada. Simbolos guardados.")
