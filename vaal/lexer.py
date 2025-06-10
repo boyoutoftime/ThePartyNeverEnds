@@ -30,7 +30,7 @@ def nodo_a_texto(nodo):
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    nodos = walker.get_latex_nodes(pos=0).nodelist  # ← Esta línea corregida
+    nodos, _ = walker.get_latex_nodes(pos=0)  # ← Esta línea funciona con tu versión
 
     bloques_matematicos = []
     bloques_texto = []
