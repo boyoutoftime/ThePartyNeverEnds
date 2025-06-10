@@ -1,8 +1,8 @@
-from pylatexenc.latexwalker import LatexWalker, LatexEnvironmentNode, LatexMathNode
+from pylatexenc.latexwalker import LatexWalker, LatexMathNode
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    nodos, errores = walker.get_latex_nodes()
+    nodos = walker.get_latex_nodes()  # ← Corrección aquí
 
     bloques_matematicos = []
     bloques_texto = []
@@ -16,7 +16,7 @@ def detectar_bloques_latex(texto):
 
     return bloques_texto, bloques_matematicos
 
-# Prueba con texto mixto
+# Prueba
 texto_prueba = r"""
 Este es un documento sobre física cuántica.
 La ecuación de Schrödinger es: $i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi$
