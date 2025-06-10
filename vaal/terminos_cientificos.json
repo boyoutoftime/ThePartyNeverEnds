@@ -1,6 +1,0 @@
-{
-  "ADN": ["ácido desoxirribonucleico", "dna"],
-  "ARN": ["ácido ribonucleico", "rna"],
-  "proteína": ["proteínas", "polipéptido", "péptido"],
-  "enzima": ["enzimas", "catalizador biológico"]
-}
