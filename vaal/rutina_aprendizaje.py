@@ -38,19 +38,10 @@ def extraer_simbolos(ecuacion):
     simbolos = set(re.findall(r"[^\w\s]", ecuacion))
     return sorted([s for s in simbolos if es_simbolo_valido(s)])
 
-def es_pdf_ruidoso(texto):
-    lineas = texto.split('\n')
-    lineas_raras = [l for l in lineas if sum(1 for c in l if not c.isprintable()) > 5]
-    return len(lineas_raras) > 20
-
 # --- Análisis del PDF ---
 def estudiar_pdf(ruta_pdf):
     print(f"\n📖 Estudiando: {ruta_pdf}")
     texto = extraer_texto_de_pdf(ruta_pdf)
-
-    if es_pdf_ruidoso(texto):
-        print(f"⚠️ PDF ignorado por contener texto no válido o binario: {ruta_pdf}")
-        return
 
     # 🔍 Extraer y guardar símbolos de ecuaciones
     simbolos_aprendidos = cargar_simbolos()
