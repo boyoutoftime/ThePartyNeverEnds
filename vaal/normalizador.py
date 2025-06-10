@@ -7,7 +7,7 @@ def cargar_terminos(ruta='terminos_cientificos.json'):
     with open(ruta, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def guardar_diccionario(diccionario, ruta='terminos_cientificos.json'):
+def guardar_diccionario(diccionario, ruta='diccivaal.json'):
     with open(ruta, 'w', encoding='utf-8') as f:
         json.dump(diccionario, f, indent=2, ensure_ascii=False)
 
