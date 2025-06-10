@@ -64,12 +64,3 @@ def normalizar_palabra(palabra, diccionario):
         return palabra
 
     return palabra
-
-    definicion = buscar_en_duckduckgo(palabra)
-    if definicion:
-        print(f"Nuevo término aprendido: {palabra} → {definicion[:60]}...")
-        diccionario[palabra] = []
-        guardar_diccionario(diccionario)
-        return palabra
-
-    return palabra
