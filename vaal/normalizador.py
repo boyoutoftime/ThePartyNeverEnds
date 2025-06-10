@@ -36,12 +36,34 @@ def buscar_en_duckduckgo(palabra):
     except:
         return None
 
+def es_palabra_valida(palabra):
+    if len(palabra) > 30:
+        return False
+    if all(not c.isalpha() for c in palabra):
+        return False
+    num_simbolos = sum(1 for c in palabra if not c.isalnum())
+    if num_simbolos / len(palabra) > 0.6:
+        return False
+    return True
+
 def normalizar_palabra(palabra, diccionario):
     palabra_lower = palabra.lower()
+
+    if not es_palabra_valida(palabra_lower):
+        return palabra  # Ignorar palabras no válidas
 
     for clave, sinonimos in diccionario.items():
         if palabra_lower == clave.lower() or palabra_lower in [s.lower() for s in sinonimos]:
             return clave
+
+    definicion = buscar_en_duckduckgo(palabra)
+    if definicion:
+        print(f"Nuevo término aprendido: {palabra} → {definicion[:60]}...")
+        diccionario[palabra] = []
+        guardar_diccionario(diccionario)
+        return palabra
+
+    return palabra
 
     definicion = buscar_en_duckduckgo(palabra)
     if definicion:
