@@ -1,6 +1,8 @@
 import fasttext
 import os
 
+# --- Código fastText para detección y carga de modelos ---
+
 modelos_fasttext = {}
 modelo_detector_idioma = None
 
@@ -41,6 +43,11 @@ def cargar_fasttext_por_idioma(idioma):
 
     return modelos_fasttext[idioma]
 
+def es_palabra_valida(palabra):
+    # Implementa aquí la validación que usas para palabras válidas
+    # Ejemplo simple:
+    return palabra.isalpha()
+
 def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
     palabra_lower = palabra.lower().strip()
     if not es_palabra_valida(palabra_lower):
@@ -73,3 +80,51 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
 
     # Si no se reconoce y no quieres buscar online, solo devuelves palabra_lower aquí
     return palabra_lower
+
+# --- Función para normalizar texto completo ---
+
+def normalizar_texto(texto, diccionario, contexto="general", verbose=False):
+    palabras = texto.split()
+    normalizadas = []
+
+    for palabra in palabras:
+        palabra_limpia = normalizar_palabra(palabra, diccionario, contexto, verbose=verbose)
+        normalizadas.append(palabra_limpia)
+
+    return " ".join(normalizadas)
+
+# --- Aquí debería ir tu función detectar_bloques_latex, que retorna texto unido y lista de ecuaciones ---
+
+# Por ejemplo (simplificado):
+def detectar_bloques_latex(texto):
+    # Aquí va tu código real que ya tienes y que separa texto y ecuaciones LaTeX
+    # Para este ejemplo retorno fijo:
+    texto_unido = "Este es un documento sobre física cuántica. La ecuación de Schrödinger es: También existen expresiones como y otras fórmulas. Este texto debe ir como bloque normal."
+    ecuaciones = [
+        "$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$",
+        "$E = mc^2$"
+    ]
+    return texto_unido, ecuaciones
+
+# --- Flujo principal ---
+
+if __name__ == "__main__":
+    texto_original = """
+    Este es un documento sobre física cuántica.
+    La ecuación de Schrödinger es: $i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$
+    También existen expresiones como $E = mc^2$ y otras fórmulas.
+    Este texto debe ir como bloque normal.
+    """
+
+    diccionario = {}  # Tu diccionario semántico si tienes
+
+    texto_unido, ecuaciones = detectar_bloques_latex(texto_original)
+
+    texto_normalizado = normalizar_texto(texto_unido, diccionario, contexto="física", verbose=True)
+
+    print("\n→ TEXTO NORMALIZADO:")
+    print(texto_normalizado)
+
+    print("\n→ ECUACIONES (sin tocar):")
+    for eq in ecuaciones:
+        print("-", eq)
