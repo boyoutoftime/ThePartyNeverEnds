@@ -1,36 +1,15 @@
-from pylatexenc.latexwalker import (
-    LatexWalker, LatexNode, LatexCharsNode,
-    LatexMathNode, LatexGroupNode, LatexMacroNode
-)
+from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode
 
 def nodo_a_texto(nodo):
-    if isinstance(nodo, LatexCharsNode):
-        return nodo.chars
-
-    elif isinstance(nodo, LatexMacroNode):
-        # Si tiene argumentos (como \frac{...}{...})
-        args = ''
-        if nodo.nodeargd and nodo.nodeargd.argnlist:
-            args = ''.join(
-                '{' + nodo_a_texto(arg) + '}' for arg in nodo.nodeargd.argnlist
-            )
-        return '\\' + nodo.macroname + args
-
-    elif isinstance(nodo, LatexGroupNode):
-        # Grupo del tipo {...}
-        return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
-
-    elif isinstance(nodo, LatexMathNode):
-        return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
-
-    elif hasattr(nodo, 'nodelist'):
-        return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
-
-    return ''  # Fallback para tipos desconocidos
+    try:
+        return nodo.latex_verbatim()
+    except AttributeError:
+        return str(nodo)
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    nodos, _ = walker.get_latex_nodes(pos=0)  # ← Esta línea funciona con tu versión
+    result = walker.get_latex_nodes(pos=0)
+    nodos = result[0]
 
     bloques_matematicos = []
     bloques_texto = []
@@ -60,5 +39,5 @@ for t in texto:
     print("-", t.strip())
 
 print("\n→ BLOQUES MATEMÁTICOS:")
-for e in ecuaciones:
-    print("-", e.strip())
+for eq in ecuaciones:
+    print("-", eq.strip())
