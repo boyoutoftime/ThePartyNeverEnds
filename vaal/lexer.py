@@ -1,32 +1,19 @@
-from pygments.lexers import TexLexer
-from pygments.token import Token
-from pygments import lex
+from pylatexenc.latexwalker import LatexWalker
 
-def clasificar_bloques(texto):
-    bloques = {
-        'matematico': [],
-        'texto': [],
-        'ruido': []
-    }
+def detectar_bloques_latex(texto):
+    walker = LatexWalker(texto)
+    nodelist, parsing_errors = walker.get_latex_nodes(pos=0)
 
-    for token_tipo, valor in lex(texto, TexLexer()):
-        valor = valor.strip()
-        if not valor:
-            continue
-
-        if token_tipo in Token.String:  # Texto normal en LaTeX
-            bloques['texto'].append(valor)
-
-        elif token_tipo in Token.Name or token_tipo in Token.Keyword:
-            bloques['matematico'].append(valor)
-
-        elif token_tipo in Token.Comment or token_tipo in Token.Other:
-            bloques['ruido'].append(valor)
-
+    bloques_matematicos = []
+    texto_normal = []
+    for nodo in nodelist:
+        contenido = texto[nodo.pos:nodo.pos_end]
+        if nodo.isNodeType('LatexMathNode'):
+            bloques_matematicos.append(contenido)
         else:
-            bloques['ruido'].append(valor)
+            texto_normal.append(contenido)
 
-    return bloques
+    return texto_normal, bloques_matematicos
 
 if __name__ == "__main__":
     texto = r"""
