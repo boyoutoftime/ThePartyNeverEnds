@@ -2,9 +2,8 @@ import os
 import json
 import sys
 import re
+import unicodedata
 from lector import extraer_texto_de_pdf
-
-# Ruta del PDF para prueba
 
 if len(sys.argv) < 2:
     print("❌ Uso: python prueba.py <ruta_pdf>")
@@ -12,7 +11,6 @@ if len(sys.argv) < 2:
 
 PDF_PRUEBA = sys.argv[1]
 
-# Cargar o crear diccionario de símbolos aprendidos
 def cargar_simbolos(ruta='simbolos_aprendidos.json'):
     if os.path.exists(ruta):
         with open(ruta, 'r', encoding='utf-8') as f:
@@ -23,19 +21,34 @@ def guardar_simbolos(diccionario, ruta='simbolos_aprendidos.json'):
     with open(ruta, 'w', encoding='utf-8') as f:
         json.dump(diccionario, f, indent=2, ensure_ascii=False)
 
-# Detecta si una línea parece una ecuación científica
+# Función que valida si el símbolo es válido para guardar
+def es_simbolo_valido(s):
+    if not s:  # vacío
+        return False
+    if not s.isprintable():  # caracteres no imprimibles (control, binarios)
+        return False
+    if s.isspace():  # espacios y similares
+        return False
+    # Obtenemos la categoría Unicode: 
+    categoria = unicodedata.category(s)
+    # 'Sm' = símbolo matemático, 'So' = símbolo otros, 'Sc' = símbolo moneda (opcionales)
+    # Puedes ajustar qué categorías quieres aceptar:
+    return categoria in ('Sm', 'So', 'Sc')
+
 def es_ecuacion(linea):
     if "=" in linea or re.search(r"\b\d+(\.\d+)?\b", linea):
         simbolos = re.findall(r"[^\w\s]", linea)  # signos no alfanuméricos
-        if len(simbolos) / max(1, len(linea)) > 0.1:
+        # filtramos los símbolos válidos según la función nueva
+        simbolos_validos = [s for s in simbolos if es_simbolo_valido(s)]
+        if len(simbolos_validos) / max(1, len(linea)) > 0.05:  # porcentaje ajustado
             return True
     return False
 
-# Extrae símbolos individuales usados en la ecuación
 def extraer_simbolos(ecuacion):
-    return sorted(set(re.findall(r"[^\w\s]", ecuacion)))
+    simbolos = set(re.findall(r"[^\w\s]", ecuacion))
+    # filtramos solo símbolos válidos
+    return sorted([s for s in simbolos if es_simbolo_valido(s)])
 
-# --- Flujo principal ---
 if __name__ == '__main__':
     if not os.path.exists(PDF_PRUEBA):
         print("❌ No se encontró el PDF de prueba.")
@@ -51,8 +64,10 @@ if __name__ == '__main__':
             nuevos = extraer_simbolos(linea)
             for s in nuevos:
                 if s not in simbolos_aprendidos:
-                    simbolos_aprendidos[s] = "Símbolo detectado en ecuación"
-                    print(f"➕ Nuevo símbolo aprendido: {s}")
+                    # Guardamos la categoría Unicode junto al símbolo
+                    categoria = unicodedata.category(s)
+                    simbolos_aprendidos[s] = f"Símbolo detectado en ecuación (Categoría Unicode: {categoria})"
+                    print(f"➕ Nuevo símbolo aprendido: {s} (Categoría: {categoria})")
 
     guardar_simbolos(simbolos_aprendidos)
-    print("\n✅ Lectura de ecuaciones completada. Simbolos guardados.")
+    print("\n✅ Lectura de ecuaciones completada. Símbolos guardados.")
