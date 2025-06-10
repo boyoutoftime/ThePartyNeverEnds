@@ -1,43 +1,42 @@
-from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode
-
-def nodo_a_texto(nodo):
-    try:
-        return nodo.latex_verbatim()
-    except AttributeError:
-        return str(nodo)
+from pylatexenc.latexwalker import LatexWalker, LatexEnvironmentNode, LatexCharsNode, LatexMathNode
+from pylatexenc.latex2text import LatexNodes2Text
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
     result = walker.get_latex_nodes(pos=0)
-    nodos = result[0]
+    nodelist = result[0] if isinstance(result, tuple) else result  # Compatibilidad segura
 
-    bloques_matematicos = []
-    bloques_texto = []
+    texto_normal = []
+    ecuaciones = []
 
-    for nodo in nodos:
-        if isinstance(nodo, LatexMathNode):
-            bloques_matematicos.append(nodo_a_texto(nodo))
-        elif isinstance(nodo, LatexCharsNode):
-            bloques_texto.append(nodo.chars)
-        else:
-            bloques_texto.append(nodo_a_texto(nodo))
+    for nodo in nodelist:
+        if isinstance(nodo, LatexCharsNode):
+            fragmento = nodo.chars.strip()
+            if fragmento:
+                texto_normal.append(fragmento)
 
-    return bloques_texto, bloques_matematicos
+        elif isinstance(nodo, LatexMathNode):
+            contenido = texto[nodo.pos:nodo.pos_end]
+            ecuaciones.append(contenido.strip())
 
-# Prueba
-texto_prueba = r"""
+    texto_unido = " ".join(texto_normal).strip()
+
+    return texto_unido, ecuaciones
+
+
+# ------------------- Prueba ---------------------
+
+if __name__ == "__main__":
+    texto_prueba = r"""
 Este es un documento sobre física cuántica.
 La ecuación de Schrödinger es: $i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi$
 También existen expresiones como $E = mc^2$ y otras fórmulas.
 Este texto debe ir como bloque normal.
 """
 
-texto, ecuaciones = detectar_bloques_latex(texto_prueba)
+    texto_unido, ecuaciones_limpias = detectar_bloques_latex(texto_prueba)
 
-print("→ TEXTO NORMAL:")
-for t in texto:
-    print("-", t.strip())
-
-print("\n→ BLOQUES MATEMÁTICOS:")
-for eq in ecuaciones:
-    print("-", eq.strip())
+    print("\n→ TEXTO UNIDO:\n", texto_unido)
+    print("\n→ BLOQUES MATEMÁTICOS:")
+    for eq in ecuaciones_limpias:
+        print("-", eq)
