@@ -1,10 +1,8 @@
-from pylatexenc.latexwalker import LatexWalker, LatexEnvironmentNode, LatexCharsNode, LatexMathNode
-from pylatexenc.latex2text import LatexNodes2Text
+from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    result = walker.get_latex_nodes(pos=0)
-    nodelist = result[0] if isinstance(result, tuple) else result  # Compatibilidad segura
+    nodelist, *_ = walker.get_latex_nodes(pos=0)
 
     texto_normal = []
     ecuaciones = []
@@ -16,8 +14,8 @@ def detectar_bloques_latex(texto):
                 texto_normal.append(fragmento)
 
         elif isinstance(nodo, LatexMathNode):
-            contenido = texto[nodo.pos:nodo.pos_end]
-            ecuaciones.append(contenido.strip())
+            contenido = nodo.latex_verbatim().strip()
+            ecuaciones.append(contenido)
 
     texto_unido = " ".join(texto_normal).strip()
 
