@@ -22,7 +22,7 @@ if __name__ == "__main__":
     También existen expresiones como $E=mc^2$ y otras fórmulas.
     """
 
-    resultado = clasificar_bloques(texto)
+    resultado = detectar_bloques_latex(texto)
 
     print("→ TEXTO NORMAL:")
     print(resultado['texto'])
