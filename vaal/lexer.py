@@ -2,7 +2,13 @@ from pylatexenc.latexwalker import LatexWalker, LatexMathNode
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    nodos, _ = walker.get_latex_nodes(pos=0)
+    resultado = walker.get_latex_nodes(pos=0)
+
+    # Si get_latex_nodes devuelve una tupla (nodos, estado)
+    if isinstance(resultado, tuple):
+        nodos = resultado[0]
+    else:
+        nodos = resultado
 
     bloques_matematicos = []
     bloques_texto = []
