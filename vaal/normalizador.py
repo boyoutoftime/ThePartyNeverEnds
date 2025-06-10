@@ -3,7 +3,7 @@ import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
 
-def cargar_terminos(ruta='terminos_cientificos.json'):
+def cargar_terminos(ruta='diccivaal.json'):
     with open(ruta, 'r', encoding='utf-8') as f:
         return json.load(f)
 
