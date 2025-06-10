@@ -2,12 +2,12 @@ from pylatexenc.latexwalker import LatexWalker, LatexMathNode
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    nodelist = walker.get_latex_nodes(pos=0).nodelist
+    nodos, _ = walker.get_latex_nodes(pos=0)
 
     bloques_matematicos = []
     bloques_texto = []
 
-    for nodo in nodelist:
+    for nodo in nodos:
         contenido = str(nodo).strip()
         if isinstance(nodo, LatexMathNode):
             bloques_matematicos.append(contenido)
