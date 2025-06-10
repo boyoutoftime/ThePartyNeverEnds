@@ -1,28 +1,36 @@
-from pylatexenc.latexwalker import LatexWalker, LatexMathNode, LatexCharsNode
+from pylatexenc.latexwalker import (
+    LatexWalker, LatexNode, LatexCharsNode,
+    LatexMathNode, LatexGroupNode, LatexMacroNode
+)
 
 def nodo_a_texto(nodo):
-    """
-    Convierte un nodo Latex a texto plano, recursivamente si es necesario.
-    """
     if isinstance(nodo, LatexCharsNode):
         return nodo.chars
-    elif isinstance(nodo, LatexMathNode):
-        # Para nodos matemáticos, concatenamos recursivamente su nodelist
+
+    elif isinstance(nodo, LatexMacroNode):
+        # Si tiene argumentos (como \frac{...}{...})
+        args = ''
+        if nodo.nodeargd and nodo.nodeargd.argnlist:
+            args = ''.join(
+                '{' + nodo_a_texto(arg) + '}' for arg in nodo.nodeargd.argnlist
+            )
+        return '\\' + nodo.macroname + args
+
+    elif isinstance(nodo, LatexGroupNode):
+        # Grupo del tipo {...}
         return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
-    else:
-        # Para otros nodos (macros, grupos), intentamos extraer texto de sus hijos
-        if hasattr(nodo, 'nodelist'):
-            return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
-        return ''
+
+    elif isinstance(nodo, LatexMathNode):
+        return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
+
+    elif hasattr(nodo, 'nodelist'):
+        return ''.join(nodo_a_texto(n) for n in nodo.nodelist)
+
+    return ''  # Fallback para tipos desconocidos
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(texto)
-    resultado = walker.get_latex_nodes(pos=0)
-
-    if isinstance(resultado, tuple):
-        nodos = resultado[0]
-    else:
-        nodos = resultado
+    nodos, _ = walker.get_latex_nodes(pos=0)
 
     bloques_matematicos = []
     bloques_texto = []
@@ -33,7 +41,6 @@ def detectar_bloques_latex(texto):
         elif isinstance(nodo, LatexCharsNode):
             bloques_texto.append(nodo.chars)
         else:
-            # Podrías considerar si quieres procesar más tipos de nodos aquí
             bloques_texto.append(nodo_a_texto(nodo))
 
     return bloques_texto, bloques_matematicos
