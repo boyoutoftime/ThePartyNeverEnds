@@ -1,32 +1,50 @@
+from langdetect import detect
 import fasttext
 import os
 
-# Cargar modelo fastText solo una vez
-modelo_ft = None
-def cargar_fasttext(ruta='cc.es.300.bin'):
-    global modelo_ft
-    if modelo_ft is None and os.path.exists(ruta):
-        print("→ Cargando modelo fastText...")
-        modelo_ft = fasttext.load_model(ruta)
-    return modelo_ft
+modelos_fasttext = {}
+
+def cargar_fasttext_por_idioma(idioma):
+    rutas = {
+        'es': 'cc.es.300.bin',
+        'en': 'cc.en.300.bin',
+        # Agrega aquí más idiomas si los descargas
+    }
+
+    if idioma not in modelos_fasttext:
+        ruta = rutas.get(idioma)
+        if ruta and os.path.exists(ruta):
+            print(f"→ Cargando fastText para idioma '{idioma}'")
+            modelos_fasttext[idioma] = fasttext.load_model(ruta)
+        else:
+            print(f"[ADVERTENCIA] No se encontró modelo para idioma '{idioma}'")
+            modelos_fasttext[idioma] = None
+
+    return modelos_fasttext[idioma]
 
 def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
     palabra_lower = palabra.lower().strip()
     if not es_palabra_valida(palabra_lower):
         return palabra_lower
 
-    # Cargar fastText
-    ft = cargar_fasttext()
+    # Detectar idioma
+    try:
+        idioma = detect(palabra_lower)
+    except:
+        idioma = "es"  # por defecto español si falla
 
-    # Verificar si fastText la conoce
+    # Cargar fastText del idioma detectado
+    ft = cargar_fasttext_por_idioma(idioma)
+
+    # Verificar si fastText la reconoce
     if ft is not None:
         vector = ft.get_word_vector(palabra_lower)
-        if vector.any():  # Tiene representación, palabra válida
+        if vector.any():
             if verbose:
-                print(f"[fastText] Palabra reconocida: '{palabra_lower}'")
+                print(f"[fastText-{idioma}] Palabra reconocida: '{palabra_lower}'")
             return palabra_lower
 
-    # Verificar si ya la conocíamos
+    # Revisar si ya está en el diccionario
     if palabra_lower in diccionario:
         entrada = diccionario[palabra_lower]
         if isinstance(entrada, dict) and "contexto" in entrada:
@@ -35,7 +53,7 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
         elif isinstance(entrada, dict) and contexto == "general":
             return palabra_lower
 
-    # Si no existe en fastText ni en el diccionario → buscar en línea
+    # Buscar online si no se reconoce
     definicion = buscar_en_duckduckgo(palabra_lower)
     if definicion:
         if verbose:
