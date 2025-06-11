@@ -1,6 +1,7 @@
 import os
 import fasttext
 from bpemb import BPEmb
+import re
 
 # --- CARGA GLOBAL DE MODELOS --- #
 
@@ -23,9 +24,9 @@ def cargar_detector_idioma(ruta='~/ThePartyNeverEnds/vaal/fasttext/lid.176.bin')
 def detectar_idioma_fasttext(texto):
     modelo = cargar_detector_idioma()
     if modelo is None or not texto.strip():
-        return "es"  # Fallback a español
+        return "es"  # Fallback
     etiquetas, _ = modelo.predict(texto)
-    etiqueta = etiquetas[0]  # Ejemplo: '__label__es'
+    etiqueta = etiquetas[0]
     idioma = etiqueta.replace("__label__", "")
     return idioma
 
@@ -41,7 +42,7 @@ def cargar_bpemb(idioma, dim=300):
             bpemb_modelos[idioma] = None
     return bpemb_modelos[idioma]
 
-# --- FUNCIONES DE VALIDACIÓN Y NORMALIZACIÓN --- #
+# --- VALIDACIÓN Y NORMALIZACIÓN --- #
 
 def es_palabra_valida(palabra):
     return palabra.isalpha()
@@ -51,12 +52,10 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
     if not es_palabra_valida(palabra_lower):
         return palabra_lower
 
-    # Detectar idioma
     idioma = detectar_idioma_fasttext(palabra_lower)
     if verbose:
         print(f"[Detector fastText] Idioma detectado: {idioma}")
 
-    # Validar con BPEmb
     bpemb = cargar_bpemb(idioma)
     if bpemb is not None:
         tokens = bpemb.encode(palabra_lower)
@@ -65,7 +64,6 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
                 print(f"[BPEmb-{idioma}] Palabra reconocida: '{palabra_lower}' → tokens: {tokens}")
             return palabra_lower
 
-    # Verificación en diccionario propio
     if palabra_lower in diccionario:
         entrada = diccionario[palabra_lower]
         if isinstance(entrada, dict) and "contexto" in entrada:
@@ -79,24 +77,33 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
 def normalizar_texto(texto, diccionario, contexto="general", verbose=False):
     palabras = texto.split()
     normalizadas = []
-
     for palabra in palabras:
         palabra_limpia = normalizar_palabra(palabra, diccionario, contexto, verbose=verbose)
         normalizadas.append(palabra_limpia)
-
     return " ".join(normalizadas)
 
-# --- DETECCIÓN SIMPLIFICADA DE BLOQUES LaTeX --- #
+# --- DETECCIÓN Y MARCADO DE BLOQUES LaTeX --- #
 
 def detectar_bloques_latex(texto):
-    texto_unido = "Este es un documento sobre física cuántica. La ecuación de Schrödinger es: También existen expresiones como y otras fórmulas. Este texto debe ir como bloque normal."
-    ecuaciones = [
-        "$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$",
-        "$E = mc^2$"
-    ]
-    return texto_unido, ecuaciones
+    patron = r"(\$.*?\$)"  # Detecta bloques LaTeX simples en una línea
+    ecuaciones = re.findall(patron, texto)
 
-# --- FLUJO PRINCIPAL DE EJEMPLO --- #
+    texto_con_marcas = texto
+    for i, eq in enumerate(ecuaciones):
+        marcador = f"<<EQ{i}>>"
+        texto_con_marcas = texto_con_marcas.replace(eq, marcador, 1)
+
+    return texto_con_marcas, ecuaciones
+
+# --- REINSERCIÓN DE ECUACIONES --- #
+
+def reinsertar_ecuaciones(texto_con_marcas, ecuaciones):
+    for i, eq in enumerate(ecuaciones):
+        marcador = f"<<EQ{i}>>"
+        texto_con_marcas = texto_con_marcas.replace(marcador, eq)
+    return texto_con_marcas
+
+# --- FLUJO PRINCIPAL --- #
 
 if __name__ == "__main__":
     texto_original = """
@@ -106,15 +113,20 @@ if __name__ == "__main__":
     Este texto debe ir como bloque normal.
     """
 
-    diccionario = {}  # Tu diccionario semántico
+    diccionario = {}  # Diccionario semántico personalizado
 
-    texto_unido, ecuaciones = detectar_bloques_latex(texto_original)
+    # 1. Detectar ecuaciones y marcar con <<EQi>>
+    texto_marcado, ecuaciones = detectar_bloques_latex(texto_original)
 
-    texto_normalizado = normalizar_texto(texto_unido, diccionario, contexto="física", verbose=True)
+    # 2. Normalizar solo el texto
+    texto_normalizado = normalizar_texto(texto_marcado, diccionario, contexto="física", verbose=True)
 
-    print("\n→ TEXTO NORMALIZADO:")
-    print(texto_normalizado)
+    # 3. Reinsertar ecuaciones donde estaban
+    texto_final = reinsertar_ecuaciones(texto_normalizado, ecuaciones)
 
-    print("\n→ ECUACIONES (sin tocar):")
+    print("\n→ TEXTO FINAL NORMALIZADO + REINSERTADO:")
+    print(texto_final)
+
+    print("\n→ ECUACIONES:")
     for eq in ecuaciones:
         print("-", eq)
