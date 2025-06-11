@@ -16,7 +16,8 @@ def cargar_detector_idioma(ruta='lid.176.bin'):
             print(f"[ERROR] No se encontró el modelo detector de idioma en '{ruta}'")
     return modelo_detector_idioma
 
-def detectar_idioma_fasttext(texto):
+def cargar_detector_idioma(ruta='~/fasttext_models/lid.176.bin'):
+    ruta = os.path.expanduser(ruta)
     modelo = cargar_detector_idioma()
     if modelo is None or not texto.strip():
         return "es"  # fallback a español
@@ -27,8 +28,8 @@ def detectar_idioma_fasttext(texto):
 
 def cargar_fasttext_por_idioma(idioma):
     rutas = {
-        'es': 'cc.es.300.bin',
-        'en': 'cc.en.300.bin',
+        'es': '~/fasttext/cc.es.300.bin',
+        'en': '~/fasttext/cc.en.300.bin',
         # Agrega más idiomas si quieres
     }
 
