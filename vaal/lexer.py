@@ -1,7 +1,17 @@
-from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode
+from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode, LatexEnvironmentNode, LatexGroupNode
+from pylatexenc.latexwalker import default_macro_dict, default_env_dict, MacroStandardArgsParser
 
 def detectar_bloques_latex(texto):
-    walker = LatexWalker(texto)
+    walker = LatexWalker(
+        texto,
+        macro_dict=default_macro_dict,
+        env_dict=default_env_dict,
+        math_mode_delimiters=[
+            ('$', '$'),             # inline
+            ('\', '\'),         # display
+            ('$$', '$$'),           # display alternative
+        ]
+    )
     nodelist, *_ = walker.get_latex_nodes(pos=0)
 
     texto_normal = []
@@ -18,20 +28,4 @@ def detectar_bloques_latex(texto):
             ecuaciones.append(contenido)
 
     texto_unido = " ".join(texto_normal).strip()
-
     return texto_unido, ecuaciones
-
-if __name__ == "__main__":
-    texto_de_prueba = (
-        "Este es un texto con una ecuación inline $E=mc^2$ "
-        "y otra en modo display: \\\int_0^\\infty e^{-x} dx = 1 \. "
-        "Además, hay más texto al final."
-    )
-
-    texto, ecuaciones = detectar_bloques_latex(texto_de_prueba)
-
-    print("Texto normal:")
-    print(texto)
-    print("\nEcuaciones encontradas:")
-    for i, eq in enumerate(ecuaciones, 1):
-        print(f"{i}: {eq}")
