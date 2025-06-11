@@ -1,5 +1,16 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import chardet
+
+def leer_archivo_con_detec_encoding(ruta_archivo):
+    with open(ruta_archivo, "rb") as f:
+        rawdata = f.read()
+    resultado = chardet.detect(rawdata)
+    encoding = resultado['encoding']
+    print(f"[INFO] Codificación detectada: {encoding}")
+
+    texto = rawdata.decode(encoding, errors="ignore")
+    return texto
 
 class MathBertLexer:
     def __init__(self, model_name="tbs17/mathbert"):
@@ -16,12 +27,10 @@ class MathBertLexer:
             outputs = self.model(**inputs)
             logits = outputs.logits
             probs = torch.softmax(logits, dim=1)
-            # Supongamos que la etiqueta 1 es "matemático" y 0 "texto"
             pred = torch.argmax(probs, dim=1).item()
             return pred, probs[0][pred].item()
 
     def procesar_texto(self, texto, separador="\n\n"):
-        # Divide texto en fragmentos (párrafos o bloques)
         fragmentos = texto.split(separador)
         texto_normal = []
         fragmentos_matematicos = []
@@ -38,7 +47,6 @@ class MathBertLexer:
 
         return texto_normal, fragmentos_matematicos
 
-
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
@@ -46,8 +54,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     archivo = sys.argv[1]
-    with open(archivo, "r", encoding="utf-8") as f:
-        texto = f.read()
+    texto = leer_archivo_con_detec_encoding(archivo)
 
     lexer = MathBertLexer()
     texto_normal, fragmentos_matematicos = lexer.procesar_texto(texto)
