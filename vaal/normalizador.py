@@ -6,7 +6,7 @@ import os
 modelos_fasttext = {}
 modelo_detector_idioma = None
 
-def cargar_detector_idioma(ruta='lid.176.bin'):
+def cargar_detector_idioma(ruta='~/fasttext/lid.176.bin'):
     global modelo_detector_idioma
     if modelo_detector_idioma is None:
         if os.path.exists(ruta):
@@ -27,8 +27,8 @@ def detectar_idioma_fasttext(texto):
 
 def cargar_fasttext_por_idioma(idioma):
     rutas = {
-        'es': 'cc.es.300.bin',
-        'en': 'cc.en.300.bin',
+        'es': '~/fasttext/cc.es.300.bin',
+        'en': '~/fasttext/cc.en.300.bin',
         # Agrega más idiomas si quieres
     }
 
