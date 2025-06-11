@@ -2,14 +2,24 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import chardet
 
-def leer_archivo_con_detec_encoding(ruta_archivo):
+def leer_archivo_con_detec_encoding(ruta_archivo, default="utf-8"):
     with open(ruta_archivo, "rb") as f:
         rawdata = f.read()
     resultado = chardet.detect(rawdata)
-    encoding = resultado['encoding']
-    print(f"[INFO] Codificación detectada: {encoding}")
+    encoding = resultado.get('encoding')
 
-    texto = rawdata.decode(encoding, errors="ignore")
+    if not encoding:
+        print(f"[WARN] Codificación no detectada. Usando por defecto: {default}")
+        encoding = default
+    else:
+        print(f"[INFO] Codificación detectada: {encoding}")
+
+    try:
+        texto = rawdata.decode(encoding, errors="ignore")
+    except Exception as e:
+        print(f"[ERROR al decodificar con {encoding}]: {e}")
+        texto = rawdata.decode(default, errors="ignore")
+
     return texto
 
 class MathBertLexer:
