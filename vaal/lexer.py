@@ -33,3 +33,27 @@ def extraer_texto_pdf(ruta_pdf):
             for pagina in doc:
                 texto_total += pagina.get_text()
         return texto_total
+    except Exception as e:
+        print(f"[ERROR al leer el PDF]: {e}")
+        return ""
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Uso: python analizar_pdf_latex.py archivo.pdf")
+        sys.exit(1)
+
+    archivo_pdf = sys.argv[1]
+    texto = extraer_texto_pdf(archivo_pdf)
+
+    if not texto.strip():
+        print("⚠️ El PDF no contiene texto o no se pudo extraer.")
+        sys.exit(1)
+
+    texto_normal, ecuaciones = detectar_bloques_latex(texto)
+
+    print("\n=== TEXTO DETECTADO (limpio) ===\n")
+    print(texto_normal[:1000] + "\n[...]")  # Muestra solo los primeros 1000 caracteres
+
+    print("\n=== ECUACIONES DETECTADAS ===\n")
+    for i, eq in enumerate(ecuaciones):
+        print(f"[{i+1}] {eq}")
