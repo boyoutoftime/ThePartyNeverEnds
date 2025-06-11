@@ -52,8 +52,7 @@ if __name__ == "__main__":
     texto_normal, ecuaciones = detectar_bloques_latex(texto)
 
     print("\n=== TEXTO DETECTADO (limpio) ===\n")
-    print(texto_normal[:1000] + "\n[...]")  # Muestra solo los primeros 1000 caracteres
-
+    
     print("\n=== ECUACIONES DETECTADAS ===\n")
     for i, eq in enumerate(ecuaciones):
         print(f"[{i+1}] {eq}")
