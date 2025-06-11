@@ -7,6 +7,7 @@ modelos_fasttext = {}
 modelo_detector_idioma = None
 
 def cargar_detector_idioma(ruta='~/fasttext/lid.176.bin'):
+    ruta = os.path.expanduser(ruta)
     global modelo_detector_idioma
     if modelo_detector_idioma is None:
         if os.path.exists(ruta):
