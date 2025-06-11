@@ -3,6 +3,7 @@ import fasttext
 from bpemb import BPEmb
 from transformers import AutoTokenizer, AutoModel
 import torch
+from lexer import detectar_bloques_latex(texto)
 
 # --- CARGA GLOBAL DE MODELOS --- #
 modelo_detector_idioma = None
