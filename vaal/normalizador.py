@@ -1,10 +1,13 @@
-import fasttext
 import os
+import fasttext
+from bpemb import BPEmb
 
-# --- Código fastText para detección y carga de modelos ---
+# --- CARGA GLOBAL DE MODELOS --- #
 
-modelos_fasttext = {}
 modelo_detector_idioma = None
+bpemb_modelos = {}
+
+# --- DETECCIÓN DE IDIOMA --- #
 
 def cargar_detector_idioma(ruta='~/ThePartyNeverEnds/vaal/fasttext/lid.176.bin'):
     ruta = os.path.expanduser(ruta)
@@ -20,33 +23,27 @@ def cargar_detector_idioma(ruta='~/ThePartyNeverEnds/vaal/fasttext/lid.176.bin')
 def detectar_idioma_fasttext(texto):
     modelo = cargar_detector_idioma()
     if modelo is None or not texto.strip():
-        return "es"  # fallback a español
+        return "es"  # Fallback a español
     etiquetas, _ = modelo.predict(texto)
     etiqueta = etiquetas[0]  # Ejemplo: '__label__es'
     idioma = etiqueta.replace("__label__", "")
     return idioma
 
-def cargar_fasttext_por_idioma(idioma):
-    rutas = {
-        'es': '~/ThePartyNeverEnds/vaal/fasttext/cc.es.300.bin',
-        'en': '~/ThePartyNeverEnds/vaal/fasttext/cc.en.300.bin',
-        # Agrega más idiomas si quieres
-    }
+# --- CARGA DE BPEmb POR IDIOMA --- #
 
-    if idioma not in modelos_fasttext:
-        ruta = rutas.get(idioma)
-        if ruta and os.path.exists(ruta):
-            print(f"→ Cargando fastText para idioma '{idioma}'")
-            modelos_fasttext[idioma] = fasttext.load_model(ruta)
-        else:
-            print(f"[ADVERTENCIA] No se encontró modelo para idioma '{idioma}'")
-            modelos_fasttext[idioma] = None
+def cargar_bpemb(idioma, dim=300):
+    if idioma not in bpemb_modelos:
+        try:
+            print(f"→ Cargando BPEmb para '{idioma}'...")
+            bpemb_modelos[idioma] = BPEmb(lang=idioma, dim=dim)
+        except Exception as e:
+            print(f"[ERROR] No se pudo cargar BPEmb para '{idioma}': {e}")
+            bpemb_modelos[idioma] = None
+    return bpemb_modelos[idioma]
 
-    return modelos_fasttext[idioma]
+# --- FUNCIONES DE VALIDACIÓN Y NORMALIZACIÓN --- #
 
 def es_palabra_valida(palabra):
-    # Implementa aquí la validación que usas para palabras válidas
-    # Ejemplo simple:
     return palabra.isalpha()
 
 def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
@@ -54,23 +51,21 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
     if not es_palabra_valida(palabra_lower):
         return palabra_lower
 
-    # Detectar idioma con fastText
+    # Detectar idioma
     idioma = detectar_idioma_fasttext(palabra_lower)
     if verbose:
         print(f"[Detector fastText] Idioma detectado: {idioma}")
 
-    # Cargar modelo fastText para ese idioma
-    ft = cargar_fasttext_por_idioma(idioma)
-
-    # Verificar si fastText reconoce la palabra
-    if ft is not None:
-        vector = ft.get_word_vector(palabra_lower)
-        if vector.any():
+    # Validar con BPEmb
+    bpemb = cargar_bpemb(idioma)
+    if bpemb is not None:
+        tokens = bpemb.encode(palabra_lower)
+        if tokens:
             if verbose:
-                print(f"[fastText-{idioma}] Palabra reconocida: '{palabra_lower}'")
+                print(f"[BPEmb-{idioma}] Palabra reconocida: '{palabra_lower}' → tokens: {tokens}")
             return palabra_lower
 
-    # Revisar si ya está en el diccionario
+    # Verificación en diccionario propio
     if palabra_lower in diccionario:
         entrada = diccionario[palabra_lower]
         if isinstance(entrada, dict) and "contexto" in entrada:
@@ -79,10 +74,7 @@ def normalizar_palabra(palabra, diccionario, contexto="general", verbose=True):
         elif isinstance(entrada, dict) and contexto == "general":
             return palabra_lower
 
-    # Si no se reconoce y no quieres buscar online, solo devuelves palabra_lower aquí
     return palabra_lower
-
-# --- Función para normalizar texto completo ---
 
 def normalizar_texto(texto, diccionario, contexto="general", verbose=False):
     palabras = texto.split()
@@ -94,12 +86,9 @@ def normalizar_texto(texto, diccionario, contexto="general", verbose=False):
 
     return " ".join(normalizadas)
 
-# --- Aquí debería ir tu función detectar_bloques_latex, que retorna texto unido y lista de ecuaciones ---
+# --- DETECCIÓN SIMPLIFICADA DE BLOQUES LaTeX --- #
 
-# Por ejemplo (simplificado):
 def detectar_bloques_latex(texto):
-    # Aquí va tu código real que ya tienes y que separa texto y ecuaciones LaTeX
-    # Para este ejemplo retorno fijo:
     texto_unido = "Este es un documento sobre física cuántica. La ecuación de Schrödinger es: También existen expresiones como y otras fórmulas. Este texto debe ir como bloque normal."
     ecuaciones = [
         "$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$",
@@ -107,7 +96,7 @@ def detectar_bloques_latex(texto):
     ]
     return texto_unido, ecuaciones
 
-# --- Flujo principal ---
+# --- FLUJO PRINCIPAL DE EJEMPLO --- #
 
 if __name__ == "__main__":
     texto_original = """
@@ -117,7 +106,7 @@ if __name__ == "__main__":
     Este texto debe ir como bloque normal.
     """
 
-    diccionario = {}  # Tu diccionario semántico si tienes
+    diccionario = {}  # Tu diccionario semántico
 
     texto_unido, ecuaciones = detectar_bloques_latex(texto_original)
 
