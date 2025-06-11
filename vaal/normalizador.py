@@ -1,14 +1,18 @@
 import os
 import fasttext
 from bpemb import BPEmb
+from transformers import AutoTokenizer, AutoModel
+import torch
 
 # --- CARGA GLOBAL DE MODELOS --- #
-
 modelo_detector_idioma = None
 bpemb_modelos = {}
 
-# --- DETECCIÓN DE IDIOMA --- #
+# Carga de MathBERT
+tokenizer_mathbert = AutoTokenizer.from_pretrained("tbs17/MathBERT")
+modelo_mathbert = AutoModel.from_pretrained("tbs17/MathBERT")
 
+# --- DETECCIÓN DE IDIOMA --- #
 def cargar_detector_idioma(ruta='~/ThePartyNeverEnds/vaal/fasttext/lid.176.bin'):
     ruta = os.path.expanduser(ruta)
     global modelo_detector_idioma
@@ -30,7 +34,6 @@ def detectar_idioma_fasttext(texto):
     return idioma
 
 # --- CARGA DE BPEmb POR IDIOMA --- #
-
 def cargar_bpemb(idioma, dim=300):
     if idioma not in bpemb_modelos:
         try:
@@ -41,8 +44,7 @@ def cargar_bpemb(idioma, dim=300):
             bpemb_modelos[idioma] = None
     return bpemb_modelos[idioma]
 
-# --- FUNCIONES DE VALIDACIÓN Y NORMALIZACIÓN --- #
-
+# --- FUNCIONES DE VALIDACIÓN Y NORMALIZACIÓN DE PALABRAS --- #
 def es_palabra_valida(palabra):
     return palabra.isalpha()
 
@@ -86,8 +88,26 @@ def normalizar_texto(texto, diccionario, contexto="general", verbose=False):
 
     return " ".join(normalizadas)
 
-# --- DETECCIÓN SIMPLIFICADA DE BLOQUES LaTeX --- #
+# --- NORMALIZACIÓN DE ECUACIONES CON MathBERT --- #
+def normalizar_ecuacion(ecuacion_latex, verbose=True):
+    entrada = ecuacion_latex.strip().strip('$')  # quitar delimitadores LaTeX
+    tokens = tokenizer_mathbert(entrada, return_tensors="pt")
+    with torch.no_grad():
+        salida = modelo_mathbert(**tokens)
+    vector = salida.last_hidden_state.mean(dim=1).squeeze().numpy()  # vector medio
 
+    if verbose:
+        print(f"\n[MathBERT] Ecuación: {entrada}")
+        print(f"[MathBERT] Vector shape: {vector.shape}")
+        print(f"[MathBERT] Primeros valores: {vector[:5]}...\n")
+
+    return {
+        "ecuacion_original": ecuacion_latex,
+        "ecuacion_sin_dolares": entrada,
+        "vector_mathbert": vector
+    }
+
+# --- DETECCIÓN SIMPLIFICADA DE BLOQUES LaTeX --- #
 def detectar_bloques_latex(texto):
     texto_unido = "Este es un documento sobre física cuántica. La ecuación de Schrödinger es: También existen expresiones como y otras fórmulas. Este texto debe ir como bloque normal."
     ecuaciones = [
@@ -97,7 +117,6 @@ def detectar_bloques_latex(texto):
     return texto_unido, ecuaciones
 
 # --- FLUJO PRINCIPAL DE EJEMPLO --- #
-
 if __name__ == "__main__":
     texto_original = """
     Este es un documento sobre física cuántica.
@@ -110,11 +129,16 @@ if __name__ == "__main__":
 
     texto_unido, ecuaciones = detectar_bloques_latex(texto_original)
 
+    # Normalización lingüística
     texto_normalizado = normalizar_texto(texto_unido, diccionario, contexto="física", verbose=True)
 
+    # Normalización de ecuaciones
+    ecuaciones_normalizadas = [normalizar_ecuacion(eq, verbose=True) for eq in ecuaciones]
+
+    # Resultados
     print("\n→ TEXTO NORMALIZADO:")
     print(texto_normalizado)
 
-    print("\n→ ECUACIONES (sin tocar):")
-    for eq in ecuaciones:
-        print("-", eq)
+    print("\n→ ECUACIONES NORMALIZADAS:")
+    for resultado in ecuaciones_normalizadas:
+        print("-", resultado["ecuacion_original"])
