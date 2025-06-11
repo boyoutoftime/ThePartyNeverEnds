@@ -51,8 +51,9 @@ if __name__ == "__main__":
 
     texto_normal, ecuaciones = detectar_bloques_latex(texto)
 
+
     print("\n=== TEXTO DETECTADO (limpio) ===\n")
-    
+    print(texto_normal)  # Muestra TODO el texto limpio
     print("\n=== ECUACIONES DETECTADAS ===\n")
     for i, eq in enumerate(ecuaciones):
         print(f"[{i+1}] {eq}")
