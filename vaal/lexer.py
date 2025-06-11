@@ -1,15 +1,12 @@
-from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode, LatexEnvironmentNode, LatexGroupNode
-from pylatexenc.latexwalker import default_macro_dict, default_env_dict, MacroStandardArgsParser
+from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode
 
 def detectar_bloques_latex(texto):
     walker = LatexWalker(
         texto,
-        macro_dict=default_macro_dict,
-        env_dict=default_env_dict,
         math_mode_delimiters=[
-            ('$', '$'),             # inline
-            ('\', '\'),         # display
-            ('$$', '$$'),           # display alternative
+            ('$', '$'),     # inline math
+            ('\', '\'), # display math ...
+            ('$$', '$$'),   # display math $$ ... $$
         ]
     )
     nodelist, *_ = walker.get_latex_nodes(pos=0)
