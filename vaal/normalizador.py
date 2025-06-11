@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     diccionario = {}  # Tu diccionario semántico
 
-    texto_unido, ecuaciones = detectar_bloques_latex(texto)
+    texto, ecuaciones = detectar_bloques_latex(texto_original)
 
     # Normalización lingüística
     texto_normalizado = normalizar_texto(texto_unido, diccionario, contexto="física", verbose=True)
