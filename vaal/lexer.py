@@ -1,15 +1,14 @@
+import fitz  # PyMuPDF
+import sys
 from pylatexenc.latexwalker import LatexWalker, LatexCharsNode, LatexMathNode
 
 def detectar_bloques_latex(texto):
-    walker = LatexWalker(
-        texto,
-        math_mode_delimiters=[
-            ('$', '$'),     # inline math
-            ('\', '\'), # display math ...
-            ('$$', '$$'),   # display math $$ ... $$
-        ]
-    )
-    nodelist, *_ = walker.get_latex_nodes(pos=0)
+    try:
+        walker = LatexWalker(texto)
+        nodelist, *_ = walker.get_latex_nodes(pos=0)
+    except Exception as e:
+        print(f"[ERROR en el análisis LaTeX]: {e}")
+        return "", []
 
     texto_normal = []
     ecuaciones = []
@@ -27,17 +26,10 @@ def detectar_bloques_latex(texto):
     texto_unido = " ".join(texto_normal).strip()
     return texto_unido, ecuaciones
 
-if __name__ == "__main__":
-    texto_de_prueba = (
-        "Este es un texto con una ecuación inline $E=mc^2$ "
-        "y otra en modo display: \\\int_0^\\infty e^{-x} dx = 1 \. "
-        "Y una más: $$a^2 + b^2 = c^2$$. Además, hay más texto al final."
-    )
-
-    texto, ecuaciones = detectar_bloques_latex(texto_de_prueba)
-
-    print("Texto normal:")
-    print(texto)
-    print("\nEcuaciones encontradas:")
-    for i, eq in enumerate(ecuaciones, 1):
-        print(f"{i}: {eq}")
+def extraer_texto_pdf(ruta_pdf):
+    try:
+        texto_total = ""
+        with fitz.open(ruta_pdf) as doc:
+            for pagina in doc:
+                texto_total += pagina.get_text()
+        return texto_total
