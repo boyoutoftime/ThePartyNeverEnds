@@ -108,15 +108,6 @@ def normalizar_ecuacion(ecuacion_latex, verbose=True):
         "vector_mathbert": vector
     }
 
-# --- DETECCIÓN SIMPLIFICADA DE BLOQUES LaTeX --- #
-def detectar_bloques_latex(texto):
-    texto_unido = "Este es un documento sobre física cuántica. La ecuación de Schrödinger es: También existen expresiones como y otras fórmulas. Este texto debe ir como bloque normal."
-    ecuaciones = [
-        "$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$",
-        "$E = mc^2$"
-    ]
-    return texto_unido, ecuaciones
-
 # --- FLUJO PRINCIPAL DE EJEMPLO --- #
 if __name__ == "__main__":
     texto_original = """
