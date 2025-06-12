@@ -50,10 +50,12 @@ def detectar_fragmentos(texto):
         if not linea:
             continue
 
-        ecuaciones_crudas = [m.group(1) for m in pattern.finditer(linea)]
+        ecuaciones_crudas = []
+        for m in pattern.finditer(linea):
+            # Solo extraer el grupo 0 completo (la ecuación)
+            ecuaciones_crudas.append(m.group(0))
+        
         ecuaciones_limpias = [limpiar_ecuacion(e) for e in ecuaciones_crudas]
-
-        # Eliminar duplicados dentro de la misma línea
         ecuaciones_unicas = list(sorted(set(ecuaciones_limpias)))
 
         if ecuaciones_unicas:
