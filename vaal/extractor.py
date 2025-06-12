@@ -4,8 +4,6 @@ import sys
 import os
 import json
 
-pattern = re.compile(ECUACION_REGEX, re.VERBOSE)
-
 # === Regex avanzada para detectar fragmentos matemáticos en texto plano ===
 ECUACION_REGEX = r"""
 (?<!\w)                             # no carácter alfabético antes
@@ -18,6 +16,8 @@ ECUACION_REGEX = r"""
 )
 (?![\w-])                          # no seguir con palabra o guión
 """
+
+REGEX_ECUACION = re.compile(ECUACION_REGEX, re.VERBOSE)
 
 def extraer_texto_del_pdf(pdf_path):
     texto_completo = ""
