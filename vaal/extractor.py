@@ -6,16 +6,31 @@ import json
 
 # === Regex mejorada para expresiones embebidas ===
 ECUACION_REGEX = r"""
-(?<![\w/])                               # Evita palabras/slashes al inicio
+(?<![\w/])                                  # Evita palabras/slashes al inicio
 (
-    [A-Za-zα-ωΑ-Ω0-9_]+                  # variable como Dp, x1, Σ, α
-    \s*(=|≈|∝)\s*                        # operador: igual, aproximado o proporcional
-    [-+*/^A-Za-z0-9.()±]+                # expresión o número
+    [A-Za-zα-ωΑ-Ω0-9_]+                    # variable como Dp, x1, Σ, α
+    \s*(=|≈|∝)\s*                          # operador: igual, aproximado o proporcional
+    [-+*/^A-Za-z0-9.×±()eE^]+              # número, símbolo o potencia
 )
-(?![\w/])                                # Evita palabras/slashes al final
+(?![\w/])                                  # Evita palabras/slashes al final
 """
 
 pattern = re.compile(ECUACION_REGEX, re.VERBOSE)
+
+def limpiar_ecuacion(ecuacion):
+    """
+    Limpia una ecuación eliminando paréntesis finales, puntos, comas
+    y convierte notación ×10n a notación exponencial clara.
+    """
+    ecuacion = ecuacion.strip()
+
+    # Quitar paréntesis o puntuación final
+    ecuacion = re.sub(r"[\s\.,;:)\]]+$", "", ecuacion)
+
+    # Convertir variantes como ×103 o × 10^3 a × 10^3
+    ecuacion = re.sub(r"×\s?10(\^?)(\d+)", r"× 10^\2", ecuacion)
+
+    return ecuacion
 
 def extraer_texto_del_pdf(pdf_path):
     texto_completo = ""
@@ -27,16 +42,24 @@ def extraer_texto_del_pdf(pdf_path):
 def detectar_fragmentos(texto):
     candidatos = []
     lineas = texto.split("\n")
+
     for linea in lineas:
         linea = linea.strip()
         if not linea:
             continue
-        ecuaciones = [m.group(1) for m in pattern.finditer(linea)]
-        if ecuaciones:
+
+        ecuaciones_crudas = [m.group(1) for m in pattern.finditer(linea)]
+        ecuaciones_limpias = [limpiar_ecuacion(e) for e in ecuaciones_crudas]
+
+        # Eliminar duplicados dentro de la misma línea
+        ecuaciones_unicas = list(sorted(set(ecuaciones_limpias)))
+
+        if ecuaciones_unicas:
             candidatos.append({
                 "original": linea,
-                "ecuaciones": ecuaciones
+                "ecuaciones": ecuaciones_unicas
             })
+
     return candidatos
 
 def guardar_salida(candidatos, archivo_salida):
