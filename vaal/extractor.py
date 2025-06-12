@@ -6,15 +6,15 @@ import json
 
 # === Regex mejorada para expresiones embebidas ===
 ECUACION_REGEX = r"""
-(?<![\w/])                                # No precedido por palabra/slash
+(?<![\w/])                             # No precedido por palabra o slash
 (
-    [A-Za-zα-ωΑ-Ω0-9_]+                  # Variable tipo D2, αSMC, etc.
-    \s*(=|≈|∝)\s*                        # Operadores aceptados
-    (                                    # Comienza parte derecha
-        [-+*/^A-Za-z0-9().±×eE,−∞^°′″ ]+ # Números, símbolos y formatos científicos
+    [A-Za-zα-ωΑ-Ω0-9_]+               # Variable (D2, αSMC, etc.)
+    \s*(=|≈|∝)\s*                     # Operador (=, ≈, ∝)
+    (                               
+        [+\-−±×*/^()0-9.eE,°′″∞]+   # Números, signos, paréntesis, notación científica, símbolos
     )
 )
-(?![\w/])                                # No seguido por palabra/slash
+(?![\w/])                             # No seguido por palabra o slash
 """
 
 pattern = re.compile(ECUACION_REGEX, re.VERBOSE)
