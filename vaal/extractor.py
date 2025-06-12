@@ -5,15 +5,17 @@ import os
 import json
 
 # === Regex avanzada para detectar fragmentos matemáticos en texto plano ===
-REGEX_ECUACION = re.compile(r"""
-    (?<!\w)                # no debe haber letra justo antes
-    (                     # comienzo de grupo
-        [\w\d]*?          # posibles variables
-        (?:[+\-*/^=]|\\pm|\\cdot|\\leq|\\geq|\\int|\\sum|\\frac|∑|∫)+   # símbolos matemáticos
-        [\w\d()^_\\]+     # más símbolos, variables o funciones
-    )
-    (?!\w)                # no debe haber letra justo después
-""", re.VERBOSE)
+ECUACION_REGEX = r"""
+(?<!\w)                             # no carácter alfabético antes
+(?:
+    [A-Za-z]*\s*=\s*[-+*/^A-Za-z0-9.()]+      # expresiones tipo α = 0.73 ± 0.02
+  | [A-Za-z]+\^\d+                 # potencias tipo x^2, A^3
+  | [A-Za-z]+\_\{?[0-9a-zA-Z]+\}?  # subíndices tipo N_{i}, x_1
+  | [A-Za-z]+\s*∝\s*[A-Za-z0-9/]+ # proporcionales: P ∝ ADp/2
+  | \b[A-Za-z0-9]+/[A-Za-z0-9]+\b # divisiones con slash: ADp/2
+)
+(?![\w-])                          # no seguir con palabra o guión
+"""
 
 def extraer_texto_del_pdf(pdf_path):
     texto_completo = ""
