@@ -4,21 +4,18 @@ import sys
 import os
 import json
 
-
-# === Regex avanzada para detectar fragmentos matemáticos en texto plano ===
+# === Regex mejorada para expresiones embebidas ===
 ECUACION_REGEX = r"""
-(?<!\w)                             # no carácter alfabético antes
-(?:
-    [A-Za-z]*\s*=\s*[-+*/^A-Za-z0-9.()]+      # expresiones tipo α = 0.73 ± 0.02
-  | [A-Za-z]+\^\d+                 # potencias tipo x^2, A^3
-  | [A-Za-z]+\_\{?[0-9a-zA-Z]+\}?  # subíndices tipo N_{i}, x_1
-  | [A-Za-z]+\s*∝\s*[A-Za-z0-9/]+ # proporcionales: P ∝ ADp/2
-  | \b[A-Za-z0-9]+/[A-Za-z0-9]+\b # divisiones con slash: ADp/2
+(?<![\w/])                               # Evita palabras/slashes al inicio
+(
+    [A-Za-zα-ωΑ-Ω0-9_]+                  # variable como Dp, x1, Σ, α
+    \s*(=|≈|∝)\s*                        # operador: igual, aproximado o proporcional
+    [-+*/^A-Za-z0-9.()±]+                # expresión o número
 )
-(?![\w-])                          # no seguir con palabra o guión
+(?![\w/])                                # Evita palabras/slashes al final
 """
 
-REGEX_ECUACION = re.compile(ECUACION_REGEX, re.VERBOSE)
+pattern = re.compile(ECUACION_REGEX, re.VERBOSE)
 
 def extraer_texto_del_pdf(pdf_path):
     texto_completo = ""
@@ -34,7 +31,7 @@ def detectar_fragmentos(texto):
         linea = linea.strip()
         if not linea:
             continue
-        ecuaciones = REGEX_ECUACION.findall(linea)
+        ecuaciones = [m.group(1) for m in pattern.finditer(linea)]
         if ecuaciones:
             candidatos.append({
                 "original": linea,
