@@ -4,6 +4,7 @@ import sys
 import os
 import json
 
+
 # === Regex avanzada para detectar fragmentos matemáticos en texto plano ===
 ECUACION_REGEX = r"""
 (?<!\w)                             # no carácter alfabético antes
