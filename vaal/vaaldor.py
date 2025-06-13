@@ -5,6 +5,7 @@ from pdf2image import convert_from_path
 from PIL import Image
 import pytesseract
 import os
+import sys
 
 # --- CONFIGURACIÓN --- #
 PDF_PATH = "documento.pdf"    # Cambia por el nombre de tu archivo PDF
@@ -71,4 +72,9 @@ def procesar_pdf(pdf_path):
 
 # --- EJECUCIÓN --- #
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Uso: python vaaldor.py ruta/al/archivo.pdf")
+        sys.exit(1)
+
+    PDF_PATH = sys.argv[1]
     procesar_pdf(PDF_PATH)
