@@ -32,7 +32,11 @@ def convertir_pdf_a_imagenes(pdf_path, dpi=300):
 def extraer_lineas_por_ocr(ruta_imagen):
     print(f"[OCR] Analizando: {ruta_imagen}")
     imagen = Image.open(ruta_imagen)
-    datos = pytesseract.image_to_data(imagen, output_type=pytesseract.Output.DICT)
+    datos = pytesseract.image_to_data(
+    imagen,
+    lang="eng",  # Aquí defines los idiomas que deseas usar
+    output_type=pytesseract.Output.DICT
+)
 
     lineas = {}
     for i in range(len(datos['text'])):
