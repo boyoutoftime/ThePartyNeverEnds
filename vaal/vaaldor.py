@@ -5,7 +5,6 @@ from pdf2image import convert_from_path
 from PIL import Image
 import pytesseract
 import os
-import sys
 
 # --- CONFIGURACIÓN --- #
 PDF_PATH = "documento.pdf"    # Cambia por el nombre de tu archivo PDF
