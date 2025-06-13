@@ -13,7 +13,7 @@ ECUACION_REGEX = r"""
     (
         ([-+±∓]?\s*[\dA-Za-zπeE\.]+          # Termino inicial
             (\s*[\*/\^×·]\s*[\dA-Za-zπeE\.]+)* # Operaciones posibles
-            (\s*(±|∓)\s*[\d\.]+)?             # Incertidumbre opcional
+            (\s*(±|∓|-|+)\s*[\d\.]+)?             # Incertidumbre opcional
         )
     )
 )
