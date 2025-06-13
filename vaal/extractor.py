@@ -11,7 +11,7 @@ ECUACION_REGEX = r"""
     [A-Za-zα-ωΑ-ΩµπψφΩΨΣ∆∇θλχϕϑϵ_][\wα-ωΑ-Ω]*  # Variable inicial (e.g., ψ, αSMC)
     \s*(=|≈|≅|∝|∼|∼=|≃|≤|≥|<|>)\s*           # Operador común
     (
-        ([-+*/^A-Za-z0-9eEπ√∞°′″ħ·×\s\{\},±−^]+)+  # Lado derecho flexible
+        (([-+±−*/^×·]?\s*[A-Za-z0-9α-ωΑ-ΩπeE.,^]+)+)
     )
 )
 (?![\w/])                                   # No seguido por letra/dígito/slash
