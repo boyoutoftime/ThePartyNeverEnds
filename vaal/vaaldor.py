@@ -8,7 +8,7 @@ import multiprocessing
 # --- CONFIGURACIÓN --- #
 DPI = 300
 OUTPUT_FOLDER = "paginas_img"
-NUM_PROCESOS = 5  # Usar 5 núcleos
+NUM_PROCESOS = 3  # Usar 5 núcleos
 
 def convertir_pdf_a_imagenes(pdf_path, dpi=300):
     print(f"[+] Convirtiendo PDF a imágenes (DPI: {dpi})...")
