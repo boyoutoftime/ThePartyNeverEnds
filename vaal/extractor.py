@@ -5,17 +5,20 @@ import os
 import json  
   
 # === Regex mejorada para expresiones embebidas ===  
-ECUACION_REGEX = r"""  
-(?<![\w/])                                # No precedido por palabra/slash  
-(  
-    [A-Za-zα-ωΑ-Ω0-9_]+                  # Variable tipo D2, αSMC, etc.  
-    \s*(=|≈|∝)\s*                        # Operadores aceptados  
-    (                                    # Comienza parte derecha  
-        [-+*/^A-Za-z0-9().±×eE,−∞^°′″ ]+ # Números, símbolos y formatos científicos  
-    )  
-)  
-(?![\w/])                                # No seguido por palabra/slash  
-"""  
+ECUACION_REGEX = r"""
+(?<![\w/])                                  # No precedido por letra/dígito/slash
+(
+    [A-Za-zα-ωΑ-ΩµπψφΩΨΣ∆∇θλχϕϑϵ_][\wα-ωΑ-Ω]*  # Variable inicial (e.g., ψ, αSMC)
+    \s*(=|≈|≅|∝|∼|∼=|≃|≤|≥|<|>)\s*           # Operador común
+    (
+        ([-+±∓]?\s*[\dA-Za-zπeE\.]+          # Termino inicial
+            (\s*[\*/\^×·]\s*[\dA-Za-zπeE\.]+)* # Operaciones posibles
+            (\s*(±|∓)\s*[\d\.]+)?             # Incertidumbre opcional
+        )
+    )
+)
+(?![\w/])                                   # No seguido por letra/dígito/slash
+"""
   
 pattern = re.compile(ECUACION_REGEX, re.VERBOSE)  
   
