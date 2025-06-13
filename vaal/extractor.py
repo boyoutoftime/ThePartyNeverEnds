@@ -11,6 +11,7 @@ ECUACION_REGEX = r"""
     [A-Za-zα-ωΑ-ΩµπψφΩΨΣ∆∇θλχϕϑϵ_][\wα-ωΑ-Ω]*  # Variable inicial (e.g., ψ, αSMC)
     \s*(=|≈|≅|∝|∼|∼=|≃|≤|≥|<|>)\s*           # Operador común
     (
+        (d|∂)?\s*
         (log|ln|exp|sin|cos|tan)?\s*     
         ([-+±∓]?\s*[\dA-Za-zπeE\.]+          # Termino inicial
             (\s*[\+\-\–\*/\^×·]\s*[\dA-Za-zπeE\.]+)* # Operaciones posibles
