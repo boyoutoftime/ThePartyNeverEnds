@@ -34,7 +34,7 @@ def extraer_lineas_por_ocr(ruta_imagen):
     imagen = Image.open(ruta_imagen)
     datos = pytesseract.image_to_data(
     imagen,
-    lang="eng",  # Aquí defines los idiomas que deseas usar
+    lang=idioma,  # ← Usa la variable 'idioma' que puedes cambiar desde la línea de comandos
     output_type=pytesseract.Output.DICT
 )
 
