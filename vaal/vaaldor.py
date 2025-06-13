@@ -1,4 +1,3 @@
-
 # vaaldor.py
 
 from pdf2image import convert_from_path
@@ -8,9 +7,8 @@ import os
 import sys
 
 # --- CONFIGURACIÓN --- #
-PDF_PATH = "documento.pdf"    # Cambia por el nombre de tu archivo PDF
-DPI = 300                     # Resolución de conversión (300 recomendado para OCR)
-OUTPUT_FOLDER = "paginas_img"  # Carpeta donde se guardan las imágenes (puede ser temporal)
+DPI = 300
+OUTPUT_FOLDER = "paginas_img"
 
 # --- FUNCIÓN: Convertir PDF a imágenes --- #
 def convertir_pdf_a_imagenes(pdf_path, dpi=300):
@@ -29,14 +27,14 @@ def convertir_pdf_a_imagenes(pdf_path, dpi=300):
     return rutas_imagenes
 
 # --- FUNCIÓN: Realizar OCR y extraer líneas --- #
-def extraer_lineas_por_ocr(ruta_imagen):
+def extraer_lineas_por_ocr(ruta_imagen, idioma):
     print(f"[OCR] Analizando: {ruta_imagen}")
     imagen = Image.open(ruta_imagen)
     datos = pytesseract.image_to_data(
-    imagen,
-    lang=idioma,  # ← Usa la variable 'idioma' que puedes cambiar desde la línea de comandos
-    output_type=pytesseract.Output.DICT
-)
+        imagen,
+        lang=idioma,
+        output_type=pytesseract.Output.DICT
+    )
 
     lineas = {}
     for i in range(len(datos['text'])):
@@ -60,15 +58,14 @@ def extraer_lineas_por_ocr(ruta_imagen):
     return lineas
 
 # --- FUNCIÓN PRINCIPAL --- #
-def procesar_pdf(pdf_path):
+def procesar_pdf(pdf_path, idioma):
     rutas = convertir_pdf_a_imagenes(pdf_path, dpi=DPI)
 
     for num_pagina, ruta_img in enumerate(rutas, start=1):
         print(f"\n===== PÁGINA {num_pagina} =====")
-        lineas = extraer_lineas_por_ocr(ruta_img)
+        lineas = extraer_lineas_por_ocr(ruta_img, idioma)
 
         for num_linea, palabras in lineas.items():
-            # Filtramos palabras de baja confianza
             palabras_confiables = [p['texto'] for p in palabras if p['conf'] > 50]
             if palabras_confiables:
                 texto_linea = " ".join(palabras_confiables)
@@ -77,8 +74,9 @@ def procesar_pdf(pdf_path):
 # --- EJECUCIÓN --- #
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python vaaldor.py ruta/al/archivo.pdf")
+        print("Uso: python vaaldor.py ruta/al/archivo.pdf [idioma]")
         sys.exit(1)
 
     PDF_PATH = sys.argv[1]
-    procesar_pdf(PDF_PATH)
+    idioma = sys.argv[2] if len(sys.argv) > 2 else "eng"  # Por defecto inglés
+    procesar_pdf(PDF_PATH, idioma)
