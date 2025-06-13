@@ -12,7 +12,7 @@ ECUACION_REGEX = r"""
     \s*(=|≈|≅|∝|∼|∼=|≃|≤|≥|<|>)\s*           # Operador común
     (
         ([-+±∓]?\s*[\dA-Za-zπeE\.]+          # Termino inicial
-            (\s*[\+\-\*/\^×·]\s*[\dA-Za-zπeE\.]+)* # Operaciones posibles
+            (\s*[\+\-\–\*/\^×·]\s*[\dA-Za-zπeE\.]+)* # Operaciones posibles
             (\s*(±|∓)\s*[\d\.]+)?             # Incertidumbre opcional
         )
     )
