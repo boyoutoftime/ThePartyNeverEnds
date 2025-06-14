@@ -5,9 +5,8 @@ import sys
 import multiprocessing
 from io import BytesIO
 
-# --- CONFIGURACIÓN --- #
 DPI = 300
-NUM_PROCESOS = 4  # Número de núcleos a usar
+NUM_PROCESOS = 2
 
 def convertir_pdf_a_bytes(pdf_path, dpi=300):
     print(f"[+] Convirtiendo PDF a imágenes en memoria (DPI: {dpi})...")
