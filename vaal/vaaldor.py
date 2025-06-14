@@ -7,8 +7,7 @@ from io import BytesIO
 
 # --- CONFIGURACIÓN --- #
 DPI = 300
-NUM_PROCESOS = max(1, min(multiprocessing.cpu_count() - 1, 3))  # Autoajuste
-print(f"[i] Usando {NUM_PROCESOS} procesos paralelos (de {multiprocessing.cpu_count()} disponibles)")
+NUM_PROCESOS = 3  # Número de núcleos a usar
 
 def convertir_pdf_a_bytes(pdf_path, dpi=300):
     print(f"[+] Convirtiendo PDF a imágenes en memoria (DPI: {dpi})...")
